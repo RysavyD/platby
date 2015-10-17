@@ -14,7 +14,7 @@ Jako návštěvník(ce) našich akcí nemusíš na tomto webu udělat téměř n
 {{pass}}
 
 <div class="obly modry">
-  <h5>Chceš platit za jakoukoli akci ?</h5>
+  <h5>Chceš platit za akci ?</h5>
   <p>Tvoje platba musí mít tyto náležitosti:</p>
   <ul>
     <li>být poslána na účet sdružení: <b>2800132182 / 2010</b> <small>(FIO Banka)</small></li>
@@ -28,8 +28,8 @@ Jako návštěvník(ce) našich akcí nemusíš na tomto webu udělat téměř n
 <p>Platba se celá nejprve zapíše na Tvou osobní zálohu v této evidenci - takže si můžeš akce předplatit a neobtěžovat se jednotlivými malými platbami <small>(za případné vrácení srážíme 30 Kč)</small>.</p>
 
 <div class="obly modry">
-  <h5>Chceš platit za akce serveru Fungujeme ?</h5>
-  <p class="ma_byt">Rozhodující je, abys měl(a) v {{if auth.user:}}<a href="{{=URL('default', 'user', args='profile')}}">profilu</a>{{else:}}profilu{{pass}} vyplněn <b>nick a email shodný, jako na serveru Fungujeme</b>.</p>
+  <h5>Jak se přihlašovat na akce serveru FungujemeAktivne.cz a platit za ně ?</h5>
+  <p class="ma_byt">Rozhodující je, abys měl(a) v {{if auth.user:}}<a href="{{=URL('default', 'user', args='profile')}}">profilu</a>{{else:}}profilu{{pass}} vyplněn <b>nick a email shodný, jako na serveru FungujemeAktivne (případně si to v profilu oprav)</b>.</p>
   {{if auth.user:}}<p class="nyni_je">Nyní {{if auth.user.nick:}}
   máš vyplněn nick {{=B(auth.user.nick)}} a 
   {{else:}}
@@ -61,7 +61,7 @@ Jako návštěvník(ce) našich akcí nemusíš na tomto webu udělat téměř n
 <p>A budeš-li nějaké placené akce organizovat, nastav si v {{if auth.user:}}<a href="{{=URL('default', 'user', args='profile')}}">profilu</a>{{else:}}profilu{{pass}} předvolbu Organizátor placených akcí - přibyde Ti nová volba menu pro zápis Tvých příjmů a výdajů peněz.</p> 
 </div>
 
-{{=A('další text', _href=URL('sdruzeni'))}}
+{{=A('další text', _href=URL('poprve'))}}
 {{if not auth.user:}} --
 {{=A('pokračovat přihlášením na stránky', _href=URL('default', 'index'))}}
 {{pass}}

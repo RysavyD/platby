@@ -4,7 +4,7 @@ from mz_wkasa_platby import sa_ss, Uc_sa, vs2id
 
 @auth.requires_login()
 def pokladna():
-    adm = auth.has_membership('admin')
+    adm = auth.has_membership('vedeni')
     if adm and request.args(0)=='vse': 
         query = db.pohyb.idorganizator!=None
     else: 
@@ -31,10 +31,30 @@ def pokladna():
     kombinace pro Vyřízeno: 33, 30, 3#, 3!
     statusy, které zobrazí Odsouhlasit: 22, 23, 2#, 2!, 32
     '''
-     
+
+@auth.requires_membership('vedeni')
+def dluhy():
+    zapisy = db(db.pohyb.idorganizator!=None).select(
+                db.pohyb.castka, db.pohyb.idma_dati, db.pohyb.iddal,
+                db.pohyb.idorganizator, db.auth_user.nick, db.auth_user.email, db.auth_user.vs,
+                left=db.auth_user.on(db.auth_user.id==db.pohyb.idorganizator),
+                orderby=db.pohyb.idorganizator)
+    dluhy = {}
+    id_last = -999
+    for zapis in zapisy:
+        if id_last!=zapis.pohyb.idorganizator:
+            id_last = zapis.pohyb.idorganizator
+            klic = zapis.auth_user.nick or ('id %s' % zapis.pohyb.idorganizator)
+            dluhy[klic] = [0, zapis.auth_user.email, zapis.auth_user.vs]
+        if zapis.pohyb.iddal==Uc_sa.org:   # organizátor vydal
+            dluhy[klic][0] -= zapis.pohyb.castka
+        else:                              # organizátor získal
+            dluhy[klic][0] += zapis.pohyb.castka
+    return dict(dluhy=dluhy)
+
 @auth.requires_login()
 def pokladnikovi():
-    organizator = auth.has_membership('admin'
+    organizator = auth.has_membership('vedeni'
         ) and vs2id(db, request.args(0)) or auth.user_id  # lze zadat parametrem
     _skryj(2)
     form = SQLFORM(db.pohyb)
@@ -44,11 +64,11 @@ def pokladnikovi():
                 **dict(form.vars))
         redirect(URL('pokladna'))
     response.view = 'organizator/novy_pohyb.html'
-    return dict(form=form, txt='')
+    return dict(form=form, warning=False)
 
 @auth.requires_login()
 def od_pokladnika():
-    organizator = auth.has_membership('admin'
+    organizator = auth.has_membership('vedeni'
         ) and vs2id(db, request.args(0)) or auth.user_id  # lze zadat parametrem
     _skryj(2)
     form = SQLFORM(db.pohyb)
@@ -58,11 +78,11 @@ def od_pokladnika():
                 **dict(form.vars))
         redirect(URL('pokladna'))
     response.view = 'organizator/novy_pohyb.html'
-    return dict(form=form, txt='')
+    return dict(form=form, warning=False)
 
 @auth.requires_login()
-def hotov_prijem():
-    organizator = auth.has_membership('admin'
+def dar():
+    organizator = auth.has_membership('vedeni'
         ) and vs2id(db, request.args(0)) or auth.user_id  # lze zadat parametrem
     _skryj()
     form = SQLFORM(db.pohyb)
@@ -72,24 +92,8 @@ def hotov_prijem():
         _na_konec(row, idx, form, 'pohyb_cislo_uctu__row')
     _set_akce(form)
     if form.validate():
-        if 'STRHNOUT' in form.vars.popis:
-            if form.vars.idauth_user:                 
-                idpokynu = TFu('za akci (strhnout z os.zál.)')
-                iddal = Uc_sa.oz        
-                uzivatel = db.auth_user[form.vars.idauth_user]
-                uzivatel.update_record(zaloha=uzivatel.zaloha + form.vars.castka)
-            else:
-                idpokynu = TFu('za akci (kdo ???)')
-                iddal = Uc_sa.oz_x        
-        elif 'DAR' in form.vars.popis:                
-            idpokynu = TFu('dar')
-            iddal = Uc_sa.dary
-        elif 'HOTOVKA' in form.vars.popis:
-            idpokynu = TFu('za akci (ne na os.zálohu)')
-            iddal = Uc_sa.vynos      
-        else:
-            iddal = None
-            idpokynu = TFu('??? hotov.příjem')        
+        idpokynu = TFu('dar')
+        iddal = Uc_sa.dary
         db.pohyb.insert(idorganizator=organizator,
                 id_pokynu=idpokynu,
                 idma_dati=Uc_sa.org, iddal=iddal, ks='10',
@@ -97,11 +101,63 @@ def hotov_prijem():
         _get_akce(form)
         redirect(URL('pokladna'))
     response.view = 'organizator/novy_pohyb.html'
-    return dict(form=form, txt=TFu("Věnuj pozornost údaji Popis a vyplň správně DAR nebo STRHNOUT nebo HOTOVKA. Zejména pozor v případě, když zapíšeš STRHNOUT: peníze pak připíšeme na osobní zálohu účastíka a Fungujeme si je musí 'vzít' - to se stane jen jestliže je v rezervacích na placenou akci - jinak mu to zůstane na osobní záloze a obohatíme ho na úkor sdružení(!)"))
+    return dict(form=form, warning=False)
+
+@auth.requires_login()
+def strhnout():
+    organizator = auth.has_membership('vedeni'
+        ) and vs2id(db, request.args(0)) or auth.user_id  # lze zadat parametrem
+    _skryj(warning=True)
+    form = SQLFORM(db.pohyb)
+    for idx in xrange(len(form[0])-1, -1, -1):
+        row = form[0][idx]
+        _na_konec(row, idx, form, 'pohyb_idauth_user__row', -2)
+        _na_konec(row, idx, form, 'pohyb_cislo_uctu__row')
+    _set_akce(form)
+    if form.validate():
+        if form.vars.idauth_user:                 
+            idpokynu = TFu('za akci (strhnout z os.zál.)')
+            iddal = Uc_sa.oz        
+            uzivatel = db.auth_user[form.vars.idauth_user]
+            uzivatel.update_record(zaloha=uzivatel.zaloha + form.vars.castka)
+        else:
+            idpokynu = TFu('za akci (kdo ???)')
+            iddal = Uc_sa.oz_x        
+        db.pohyb.insert(idorganizator=organizator,
+                id_pokynu=idpokynu,
+                idma_dati=Uc_sa.org, iddal=iddal, ks='10',
+                **dict(form.vars))
+        _get_akce(form)
+        redirect(URL('pokladna'))
+    response.view = 'organizator/novy_pohyb.html'
+    return dict(form=form, warning=True)
+
+@auth.requires_login()
+def hotovka():
+    organizator = auth.has_membership('vedeni'
+        ) and vs2id(db, request.args(0)) or auth.user_id  # lze zadat parametrem
+    _skryj()
+    form = SQLFORM(db.pohyb)
+    for idx in xrange(len(form[0])-1, -1, -1):
+        row = form[0][idx]
+        _na_konec(row, idx, form, 'pohyb_idauth_user__row', -2)
+        _na_konec(row, idx, form, 'pohyb_cislo_uctu__row')
+    _set_akce(form)
+    if form.validate():
+        idpokynu = TFu('za akci (ne na os.zálohu)')
+        iddal = Uc_sa.vynos      
+        db.pohyb.insert(idorganizator=organizator,
+                id_pokynu=idpokynu,
+                idma_dati=Uc_sa.org, iddal=iddal, ks='10',
+                **dict(form.vars))
+        _get_akce(form)
+        redirect(URL('pokladna'))
+    response.view = 'organizator/novy_pohyb.html'
+    return dict(form=form, warning=False)
 
 @auth.requires_login()
 def hotov_vydaj():
-    organizator = auth.has_membership('admin'
+    organizator = auth.has_membership('vedeni'
         ) and vs2id(db, request.args(0)) or auth.user_id  # lze zadat parametrem
     _skryj(1)
     form = SQLFORM(db.pohyb)
@@ -113,7 +169,7 @@ def hotov_vydaj():
         _get_akce(form)
         redirect(URL('pokladna'))
     response.view = 'organizator/novy_pohyb.html'
-    return dict(form=form, txt='')
+    return dict(form=form, warning=False)
 
 @auth.requires_membership('pokladna')
 def cokoliv():
@@ -128,9 +184,12 @@ def cokoliv():
         else:
             redirect(URL('pokladna'))
     response.view = 'organizator/novy_pohyb.html'
-    return dict(form=form, txt='')
+    return dict(form=form, warning=False)
 
-def _skryj(vic=0):
+def _skryj(vic=0, warning=False):
+    '''oba parametry řeší různé varianty skrývání/ukázání údajů - mohly by tedy být sloučeny do jednoho
+    další nesystematické informace jsou pro request.function v šabloně
+    '''
     db.pohyb.partner_id.readable=db.pohyb.partner_id.writable=False
     db.pohyb.fp_id.readable=db.pohyb.fp_id.writable=False
     db.pohyb.idma_dati.readable=db.pohyb.idma_dati.writable=False
@@ -155,20 +214,23 @@ def _skryj(vic=0):
             db.pohyb.popis.comment = TFu('místo předání, apod.')
             db.pohyb.datum.comment = TFu('skutečné datum předání')
     else:
-        db.pohyb.popis.comment = TFu(
-            'napiš (velkými písmeny!) DAR (jedná-li se o dar), STRHNOUT (je-li v rezervacích na předem placenou akci), HOTOVKA (v ostatních případech: tedy když akce není placena předem nebo účastník není a nebude v rezervaci/přihlášených). Můžeš připsat cokoli dalšího, co chceš vysvětlit pokladníkovi.')
-        db.pohyb.idauth_user.comment=TFu('přednostně zde; jen v nouzi v následujícím údaji [[Omluva: Háčky jsou momentálně až na konci.]]')
+        db.pohyb.popis.comment = TFu('Zapiš cokoli, co chceš vysvětlit pokladníkovi.')
+        if warning:
+            db.pohyb.idauth_user.comment=TFu('musí být uvedeno [[Omluva: Háčky jsou momentálně až na konci.]]')
+            db.pohyb.cislo_uctu.readable=db.pohyb.cislo_uctu.writable=False
+        else:
+            db.pohyb.idauth_user.comment=TFu('přednostně zde; jen v nouzi v následujícím údaji [[Omluva: Háčky jsou momentálně až na konci.]]')
+            db.pohyb.cislo_uctu.label = TFu('Nick nereg. uživatele')
+            db.pohyb.cislo_uctu.comment = TFu('zadej, jestliže nemůžeš nalézt/vybrat uživatele v předchozím údaji; můžeš zapsat i něco jako "host" nebo "kamarádka Kajouska"')
         #db.pohyb.vs.label = TFu('Symbol uživatele')
         #db.pohyb.vs.comment = TFu('pokud ho náhodou víte, je to ideální (101+ z sa nebo 80111+ přidělené zde); když ne, nevadí')
-        db.pohyb.cislo_uctu.label = TFu('Nick nereg. uživatele')
-        db.pohyb.cislo_uctu.comment = TFu('zadej, jestliže nemůžeš nalézt/vybrat uživatele v předchozím údaji; můžeš zapsat i něco jako "host" nebo "kamarádka Kajouska"')
     db.pohyb.castka.label = TFu('Částka')
     db.pohyb.castka.comment = TFu('kladné číslo')
     db.pohyb.ss.label = TFu('Číslo akce')
     db.pohyb.ss.comment = TFu('číslo akce (fu:9000+, sa:2000+) -- pokud máš doklad, poznamenej na něj tužkou toto číslo')
     db.pohyb.nazev_banky.label = 'Akce'
     db.pohyb.nazev_banky.comment = '(pokud možno..) datum a název akce'
-    db.pohyb.nazev_banky.requires = IS_NOT_EMPTY()
+    #db.pohyb.nazev_banky.requires = IS_NOT_EMPTY()
     db.pohyb.castka.requires = IS_DECIMAL_IN_RANGE(0.1, 999999.0)
 
 def _na_konec(row, idx, form, rowid, pozice=-1):

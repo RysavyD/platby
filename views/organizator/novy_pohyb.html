@@ -5,8 +5,19 @@
     var w2p_ajax_datetime_format = "{{=T('%Y-%m-%d')}}";
     //--></script>
 
+{{if request.function=='dar':}}
+  Pro DAR není nutné (dole) uvádět akci ani účastníka.
+{{elif request.function=='od_pokladnika':}}
+  Zapisuje se jen hotovost. Nezapisují se peníze poslané na účet - to je evidováno automaticky.
+  {{pass}}
+
 {{=form}}
 
-<p>{{=txt}}</p>
+{{if warning:}}
+  <p><b>Účastník musí být určen.<br />POZOR: Tento zápis je jen když zaplatil PŘIHLÁŠENÝ za PLACENOU akci. Jinak řečeno, musí být svým nickem uveden v Rezervaci nebo Účasti.  Jinak mu to zůstane na osobní záloze a obohatíme ho na úkor sdružení(!)</b>
+  <a href="{{=URL('organizator', 'pokladna')}}">to jsem popletl - vrátit se zpět</a></p>
+  {{pass}}
 
-<p><a href="http://www.fungujemeaktivne.cz/home/xml">Tady (nebo u akce) najdete čísla akcí.</a></p>
+<p><a href="http://www.fungujemeaktivne.cz/home/xml" target="_blank">Tady (nebo u akce) najdete čísla akcí.</a><br />
+(Ve zobrazeném souboru Ctrl-F, zadat část názvu, hledané číslo je: ActionId)
+</p>

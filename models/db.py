@@ -2,6 +2,8 @@
 
 import os
 import datetime
+import locale
+import platform
 from decimal import Decimal
 import vfp
 
@@ -33,7 +35,7 @@ class SOUHLAS_S_VS(object):
         else:                # registrovaní později
             if intss<675:
                 return ('', 'Zadané číslo uživatele není přípustné')
-        return (value, None)    
+        return (value, None)
 
 ## if SSL/HTTPS is properly configured and you want all HTTP requests to
 ## be redirected to HTTPS, uncomment the line below:
@@ -43,9 +45,14 @@ if request.is_local:
 else:
     request.requires_https()
 
+if 'windows' in platform.system().lower():
+    locale.setlocale(locale.LC_ALL, 'Czech_Czech republic.1250')
+else:
+    locale.setlocale(locale.LC_ALL, 'cs_CZ.utf8')
 if not request.env.web2py_runtime_gae:
     ## if NOT running on Google App Engine use SQLite or other DB
     db = DAL('sqlite://platby.sqlite',pool_size=1,check_reserved=['all'])
+    db._adapter.connection.create_collation("lexical", locale.strcoll)
 else:
     ## connect to Google BigTable (optional 'google:datastore://namespace')
     db = DAL('google:datastore')
@@ -68,6 +75,7 @@ auth = Auth(db)
 crud, service, plugins = Crud(db), Service(), PluginManager()
 
 ## create all tables needed by auth if not custom tables
+auth.settings.create_user_groups = None
 vs_default = TFu('dostaneš..') # max 10 znaků
 auth.settings.extra_fields['auth_user'] = [
     Field('email_ver', 'boolean', default=False, label=TFu("Mail není tajný"),
@@ -79,12 +87,12 @@ auth.settings.extra_fields['auth_user'] = [
     Field('nick', length=100, default='',
           comment=TFu('přezdívka; lze napsat např Manik/MyNick; jde o to, abychom mohli správně zadat Tvoji platbu v hotovosti - jinak Tvé zaplacení nevyrovná úhradu a může Ti vzniknout (evidenční) dluh')),
     Field('organizator', 'boolean', default=False,
-          label=TFu('Organizátor placených akcí'),
-          comment=TFu('zaškrtni, pokud budeš platit/vybírat peníze jménem Sdružení a předávat si peníze a doklady s pokladníkem')),
+          label=TFu('Organizátor akcí'),
+          comment=TFu('zaškrtni, pokud organizuješ nebo chceš organizovat akce - zpřístupní menu Záznamy do pokladny')),
     Field('vs', length=10, writable=False, default=vs_default,
           label=TFu('Osobní symbol (VS)'),
           comment=TFu('tento variabilní symbol (osobní symbol) používej pro platby; preferujeme variabilní symbol, ale s ohledem na spolecneaktivity.cz bude číslo rozpoznáno i ve specifickém symbolu')),
-    Field('ss', length=10, default='',
+    Field('ss', length=10, default='', readable=False, writable=False,
           label=TFu('Symbol pro spolecneaktivity.cz (SS)'),
           comment=TFu('uveď, chceš-li hradit akce pro tento specifický symbol na spolecneaktivity.cz; pozor: nesprávné zadání způsobí úhradu někomu jinému')),
     Field('zaloha', 'decimal(11,2)', label=TFu('Záloha'),
@@ -113,11 +121,11 @@ db.auth_user.ss.requires=[
       IS_EMPTY_OR(IS_NOT_IN_DB(db, db.auth_user.ss)),
       ]
 db.auth_user._format = '%(nick)s - %(vs)s'
-db.auth_user.email.comment = TFu('kvůli placení na Fungujeme zapiš mail z registrace na Fungujeme (při prvním přihlášení zákazníka se spec.sym. 101-674 je zde mail z registrace na spolecneaktivity.cz)')
+db.auth_user.email.comment = TFu('zapiš mail z registrace na fungujemeaktivne.cz (případně z registrace na spolecneaktivity.cz před rokem 2013)')
 name_comment = TFu('údaj nepředáme třetí straně - pomáhá nám identifikovat platby')
 db.auth_user.first_name.comment = name_comment
 db.auth_user.last_name.comment = name_comment
-db.auth_user.password.comment = TFu("raději NEPOUŽÍVEJ stejné heslo jako pro spolecneaktivity.cz nebo Fungujeme")
+db.auth_user.password.comment = TFu("raději NEPOUŽÍVEJ stejné heslo jako na jiných serverech")
 
 ## configure email
 mail = auth.settings.mailer

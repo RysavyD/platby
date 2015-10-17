@@ -10,7 +10,7 @@ def prehled():
     ss = sa_ss(auth.user.vs, auth.user.ss)[1] # spec.sym. na Jirkově
     sa_zal = __get_zaloha(ss)
     ja = db.auth_user[auth.user_id]
-    txt_clen = 'člen sdružení'
+    txt_clen = 'clen sdruzeni'
     clen_id = db(db.auth_group.role==txt_clen).select().first().id
     clenstvi = db((db.clenstvi.user_id==auth.user_id)&
           (db.clenstvi.group_id==clen_id)
@@ -19,11 +19,25 @@ def prehled():
           clen=auth.has_membership(txt_clen),
           clenstvi=clenstvi)
 
+@auth.requires_membership('pokladna')
+def nulovat_zalohu():
+    '''/id/vs/zustatek, pokud zustatek chybi, tak vynuluje'''
+    zakaznik_id = request.args(0)
+    zakaznik_vs = request.args(1)
+    zustatek = int(request.args(2) or 0)
+    if zakaznik_id and zakaznik_vs:
+        zakaznik = db.auth_user[zakaznik_id]
+        zakaznik.update_record(zaloha=zustatek)
+        redirect(URL('pohyby', args=zakaznik_vs))
+    else:
+        session.flash = 'Chybné volání'
+        redirect(URL('default', 'index'))
+
 @auth.requires_login()
 def pohyby():
     class Celkem(object):
         vlozeno=vraceno=sa_vlozeno=z_sa_prevedeno=ozwk_vlozeno=ozwk_cerpano = 0
-    uzivatel_id = auth.has_membership('admin'
+    uzivatel_id = auth.has_membership('vedeni'
         ) and vs2id(db, request.args(0)) or auth.user_id  # lze zadat parametrem
     pohyby = db(db.pohyb.idauth_user==uzivatel_id
                       ).select(orderby=~db.pohyb.datum)
@@ -70,7 +84,7 @@ def pohyby():
     return dict(zaloha=zaloha, pohyby=pohyby, Celkem=Celkem,
             Uc_sa=Uc_sa, nick=nick, uzivatel_id=uzivatel_id)
 
-@auth.requires_membership('admin')
+@auth.requires_membership('vedeni')
 def vse():
     return dict(pohyby=db().select(db.pohyb.ALL))
 
@@ -127,7 +141,7 @@ def vratit_zalohu():
         redirect(URL('prehled'))
     return dict(form=form)
 
-@auth.requires_membership('admin')
+@auth.requires_membership('vedeni')
 def vyridit():
     if len(request.args)==3: # 1/2=z_SA/na_BÚ, ss, castka po odečtu poplatku
         zadosti = db((db.zadost.ss==request.args[1])
@@ -162,7 +176,6 @@ def venovat():
     if form.validate():
         dnes = date.today()
         prijemce = db.auth_user[form.vars.komu]
-        ja = db.auth_user[auth.user.id]
         ja.update_record(zaloha=ja.zaloha - form.vars.venovat)
         db.pohyb.insert(idauth_user=auth.user.id, idma_dati=Uc_sa.oz, iddal=Uc_sa.oz_presun,
                 castka=form.vars.venovat, datum=dnes,
@@ -173,10 +186,43 @@ def venovat():
                 popis=TFu("kredit věnoval/a %s (VS=%s, id=%s)") % (
                         auth.user.nick, auth.user.vs, auth.user.id))
         prijemce.update_record(zaloha=prijemce.zaloha + form.vars.venovat)
-        session.flash = TFu("Příjemci bylo úěšně předání %s.") % (
+        session.flash = TFu("Příjemci bylo úspěšně předáno %s.") % (
                         form.vars.venovat)
         redirect(URL('platby', 'prehled'))
     return dict(form=form)
+
+@auth.requires_login()
+def darovat_sdruzeni():
+    zakaznik_id = request.args(0)
+    zakaznik_vs = request.args(1)
+    if zakaznik_id and zakaznik_vs and auth.has_membership('pokladna'):
+        ja = db.auth_user[zakaznik_id]
+        if ja.vs!=zakaznik_vs:
+            raise HTTP(403)
+        nick = ja.nick
+    else:
+        ja = db.auth_user[auth.user.id]
+        nick = None
+    if ja.zaloha<=0:
+        session.flash = TFu("Momentálně na záloze nemáš žádné peníze.")
+        redirect(URL('platby', 'prehled'))
+    form = SQLFORM.factory(
+            Field('zaloha', 'decimal(11,2)', default=ja.zaloha,
+                    writable=False, label=TFu("Stav Tvé zálohy")),
+            Field('venovat', 'decimal(11,2)', default=min((400.0, ja.zaloha)),
+                    requires=IS_DECIMAL_IN_RANGE(1.0, ja.zaloha),
+                    label=TFu("Darovat pro sdružení Kč")),
+            )
+    if form.validate():
+        dnes = date.today()
+        ja.update_record(zaloha=ja.zaloha - form.vars.venovat)
+        db.pohyb.insert(idauth_user=ja.id, idma_dati=Uc_sa.oz, iddal=Uc_sa.dary,
+                castka=form.vars.venovat, datum=dnes,
+                popis=TFu("dar sdružení"))
+        session.flash = TFu("Sdružení jsi daroval %s Kč. Děkujeme.") % (
+                        form.vars.venovat)
+        redirect(URL('platby', 'prehled'))
+    return dict(form=form, nick=nick)
 
 @auth.requires_membership('pokladna')
 def zaloha():  # nastaví požadovanou zálohu

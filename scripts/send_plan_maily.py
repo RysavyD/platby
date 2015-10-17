@@ -35,24 +35,53 @@ def send_plan_maily():
         pozice = 0
     if not pozice:    # začni rozesílat
         pozice = 999999999   # >>max 
-    is_html, dummy, subject = __parse_mailheader(planovany)
+    is_html, komu, subject = __parse_mailheader(planovany)
     obsah = unicode(vfp.filetostr(planovany2), 'utf8')
     ncount = 25  # aby nás alwaysdata netípla kvůli moc dlouhému jobu
-    zakaznici = db((db.auth_user.neposilat==False) &
-            (db.auth_user.id<pozice)).select(
-            db.auth_user.id, db.auth_user.email,
-            orderby=~db.auth_user.id, limitby=(0,ncount))
+    if komu=='Z':
+        adresati = db((db.auth_user.neposilat==False) &
+                (db.auth_user.id<pozice)).select(
+                db.auth_user.id, db.auth_user.email,
+                orderby=~db.auth_user.id, limitby=(0,ncount))
+    elif komu=='C':    # členové
+        grp = db(db.auth_group.role=='člen sdružení').select().first()
+        adresati = db((db.clenstvi.group_id==grp.id) &
+                (db.auth_user.id==db.clenstvi.user_id) &
+                (db.clenstvi.do_dne==None) &
+                (db.auth_user.id<pozice)).select(
+                db.auth_user.id, db.auth_user.email,
+                orderby=~db.auth_user.id, limitby=(0,ncount))
+    elif komu=='O':
+        grp = db(db.auth_group.role=='hlavní organizátor').select().first()
+        adresati = db(((db.auth_user.organizator==True) |
+                    ((db.clenstvi.group_id==grp.id) & (db.auth_user.id==db.clenstvi.user_id) & (db.clenstvi.do_dne==None))) &
+                (db.auth_user.id<pozice)).select(
+                db.auth_user.id, db.auth_user.email,
+                orderby=~db.auth_user.id, limitby=(0,ncount))
+    elif komu=='H':
+        grp = db(db.auth_group.role=='hlavní organizátor').select().first()
+        adresati = db((db.clenstvi.group_id==grp.id) & (db.auth_user.id==db.clenstvi.user_id) & (db.clenstvi.do_dne==None) &
+                (db.auth_user.id<pozice)).select(
+                db.auth_user.id, db.auth_user.email,
+                orderby=~db.auth_user.id, limitby=(0,ncount))
+    else:  # komu=='A'    # vedení==bafuňáři
+        grp = db(db.auth_group.role=='vedeni').select().first()
+        adresati = db((db.auth_membership.group_id==grp.id) &
+                (db.auth_user.id==db.auth_membership.user_id) &
+                (db.auth_user.id<pozice)).select(
+                db.auth_user.id, db.auth_user.email,
+                orderby=~db.auth_user.id, limitby=(0,ncount))
     #debug:
-    #zakaznici = db(db.auth_user.vs=='347').select()
-    for zakaznik in zakaznici:
-        #vfp.strtofile(str(zakaznik.id)+'\n',
+    #adresati = db(db.auth_user.vs=='347').select()
+    for adresat in adresati:
+        #vfp.strtofile(str(adresat.id)+'\n',
         #        os.path.join(os.getcwd(),'logs','xxxxxxxxxx.log'),1)
-        mandrill_send(subject, obsah, prijemci=[{'email': zakaznik.email}],
+        mandrill_send(subject, obsah, prijemci=[{'email': adresat.email}],
                 styl='html' if is_html else 'text')
-        pozice = zakaznik.id
+        pozice = adresat.id
         db(db.systab.kod=='postak').update(hodnota=str(pozice)) 
         db.commit()
-    if len(zakaznici)<ncount:   # další už nejsou
+    if len(adresati)<ncount:   # další už nejsou
         new_filestem = 'mail_' + datetime.datetime.now().strftime('%Y%m%d_%H%M') 
         vfp.rename(planovany, new_filestem + '.hlavicka')
         vfp.rename(planovany2, new_filestem + '.obsah')

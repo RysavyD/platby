@@ -8,8 +8,12 @@
     if kdo:
       kdo = '~ '+kdo
       pass
-  pass
-  prijem = (pohyb.pohyb.idma_dati==sledovany) 
-	=TR(TD(pohyb.pohyb.datum.strftime('%d.%m.%Y')), TD(pohyb.pohyb.idma_dati!=sledovany and pohyb.md.zkratka or ''), TD(pohyb.pohyb.iddal!=sledovany and pohyb.dal.zkratka or ''), TD(B(pohyb.pohyb.castka) if pohyb.pohyb.idma_dati==sledovany else (-pohyb.pohyb.castka if pohyb.pohyb.iddal==sledovany else '(%s)'%pohyb.pohyb.castka), _style="text-align: right;"), TD(pohyb.org.nick or ''), TD(kdo), TD(pohyb.pohyb.zakaznik or pohyb.pohyb.ss or '', _style="text-align: right;"), TD(not pohyb.pohyb.cislo_uctu and pohyb.pohyb.nazev_banky or pohyb.pohyb.popis or ''), auth.has_membership('pokladna') and TD(A("edit", _href="%s"%URL('prehledy', 'edit_pohyb', args=pohyb.pohyb.id, vars={'section':'jednoduche', 'next':request.function}))) or '', _class='normalni' if (pohyb.pohyb.iddal==sledovany or pohyb.pohyb.idma_dati==sledovany) else 'slabe')
+    pass
+  if sledovany:
+    prijem = (pohyb.pohyb.idma_dati==sledovany)
+    =TR(TD(pohyb.pohyb.datum.strftime('%d.%m.%Y')), TD(pohyb.pohyb.idma_dati!=sledovany and pohyb.md.zkratka or ''), TD(pohyb.pohyb.iddal!=sledovany and pohyb.dal.zkratka or ''), TD(B(pohyb.pohyb.castka) if pohyb.pohyb.idma_dati==sledovany else (-pohyb.pohyb.castka if pohyb.pohyb.iddal==sledovany else '(%s)'%pohyb.pohyb.castka), _style="text-align: right;"), TD(pohyb.org.nick or ''), TD(kdo), TD(pohyb.pohyb.zakaznik or pohyb.pohyb.ss or '', _style="text-align: right;"), TD(not pohyb.pohyb.cislo_uctu and pohyb.pohyb.nazev_banky or pohyb.pohyb.popis or ''), auth.has_membership('pokladna') and TD(A("edit", _href="%s"%URL('prehledy', 'edit_pohyb', args=pohyb.pohyb.id, vars={'section':'jednoduche', 'next':request.function}))) or '', _class='normalni' if (pohyb.pohyb.iddal==sledovany or pohyb.pohyb.idma_dati==sledovany) else 'slabe')
+  else:
+    =TR(TD(pohyb.pohyb.datum.strftime('%d.%m.%Y')), TD(pohyb.md.zkratka or ''), TD(pohyb.dal.zkratka or ''), TD(-pohyb.pohyb.castka, _style="text-align: right;"), TD(pohyb.org.nick or ''), TD(kdo), TD(pohyb.pohyb.zakaznik or pohyb.pohyb.ss or '', _style="text-align: right;"), TD(not pohyb.pohyb.cislo_uctu and pohyb.pohyb.nazev_banky or pohyb.pohyb.popis or ''), auth.has_membership('pokladna') and TD(A("edit", _href="%s"%URL('prehledy', 'edit_pohyb', args=pohyb.pohyb.id, vars={'section':'jednoduche', 'next':request.function}))) or '', _class='slabe' if (pohyb.pohyb.iddal==Uc_sa.bezny) else 'normalni')
+    pass
   pass}}
 </table></div>

@@ -1,9 +1,11 @@
 # -*- encoding: utf8 -*-
 
 import os
+import base64
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import vfp
+from mz_wkasa_platby import get_new_vs
 
 first_token = vfp.filetostr(os.path.join(request.folder,
                   'private', 'fungujeme.token'))
@@ -11,7 +13,85 @@ first_token = vfp.filetostr(os.path.join(request.folder,
 mail_subj = Uc_sa.mail_subj
 podpis = Uc_sa.podpis
 
+def naklady():
+    '''vrací pohyby (výdaje a příjmy) k zadané akci
+    ws/naklady/<args>, args:
+    token = hash(token+vs_akce)
+    vs_akce
+    '''
+    __log_ws('naklady')
+
+    if len(request.args)==2:
+        token = request.args[0]
+        vs_akce = request.args[1]
+        if token==md5(first_token+vs_akce).hexdigest():
+            pohyby = db(db.pohyb.ss==vs_akce).select()
+            retval = dict(pohyby=pohyby)
+            __log_res('ok')
+            return retval
+    __log_res('failed')
+    raise HTTP(403)
+
+def zakaznici():
+    '''vrací přehled zákazníků a jejich záloh
+    ws/zakaznici/<args>, args:
+    token = hash(token+YYYYmmddHHMMSS)
+    dummy
+    '''
+    __log_ws('zakaznici')
+
+    if len(request.args)==2:
+        token = request.args[0]
+        dummy = request.args[1]
+        if token==md5(first_token+dummy).hexdigest():
+            __log_res('ok')
+            return retval
+    __log_res('failed')
+    raise HTTP(403)
+
+def novy():
+    '''založí uživatele
+    ws/novy/<args>, args:
+    token = hash(token+mail)
+    mail
+    nick
+    '''
+    __log_ws('novy')
+
+    if len(request.args)==3:
+        token = request.args[0]
+        mail = request.args[1]
+        #nick = request.args[2]  # web2py bug (good in url, bad in args)   %c4%8c = Č
+        #nick = request.url.rsplit('/', 2)[-1]
+        nick = base64.urlsafe_b64decode(request.args[2])
+        regist_token = first_token
+        if token==md5(regist_token+mail).hexdigest():
+            nickL = nick.lower()
+            mailL = mail.lower()
+            uzivatel = db(db.auth_user.email.lower()==mailL).select().first()
+            if uzivatel:    
+                retval = dict(vs=uzivatel.vs, problem='email existuje')
+                __log_res('mail_dupl')
+                return retval
+            uzivatel = db(db.auth_user.nick.lower()==nickL).select().first()
+            if uzivatel:    
+                retval = dict(vs=uzivatel.vs, problem='nick existuje')
+                __log_res('nick_dupl')
+                return retval
+            new_vs = get_new_vs(db, vs_default)  # vs_default je definován v db.py
+            new_id = db.auth_user.insert(nick=nick, email=mail, vs=new_vs)
+            retval = dict(vs=new_vs, problem='')
+            __log_res('ok')
+            return retval
+    __log_res('failed')
+    raise HTTP(403)
+
 def udaje():
+    '''vrací údaje o uživateli
+    ws/udaje/<args>, args:
+    token = hash(token+dotaz)
+    dotaz (e-mail nebo variabilní symbol)
+    '''
     __log_ws('udaje')
 
     if len(request.args)==2:

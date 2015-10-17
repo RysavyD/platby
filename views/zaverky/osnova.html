@@ -2,4 +2,18 @@
 
 <h2>Používané podvojné účty</h2>
 
-{{=BEAUTIFY(response._vars)}}
+<table>
+{{for ucet in ucty:}}
+  <tr>
+    <td>
+      <a href="{{=URL('podvojne', 'ucet', args=ucet.id)}}">{{=ucet.ucet}}</a>
+    </td>
+    <td>
+      {{=ucet.zkratka}}
+    </td>
+    <td>
+      <a href="{{=URL('podvojne', 'ucet', args=ucet.id)}}">{{=ucet.nazev}}</a>
+    </td>
+  </tr>
+  {{pass}}
+</table>

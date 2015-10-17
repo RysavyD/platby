@@ -1,10 +1,12 @@
 {{extend 'layout.html'}}
 
+<h3>Před kontrolou</h3>
 V deníku přijatých faktur: {{=len(prijate1)}}<br />
 V deníku plateb za faktury: {{=len(platby1)}}<br />
 Ke kontrole nezaúčtovaných faktur: {{=len(nezauctovane1)}}<br />
 
 <h2>Výsledky kontroly</h2>
+<p><i>tučně jsou chyby</i></p>
 
 <p>{{=XML(protokol)}}</p>
 
@@ -14,6 +16,9 @@ Ke kontrole nezaúčtovaných faktur: {{=len(nezauctovane1)}}<br />
 V deníku přijatých faktur: {{=len(prijate2)}}<br />
 V deníku plateb za faktury: {{=len(platby2)}}<br />
 Zbývá nezaúčtovaných faktur: {{=len(nezauctovane2)}}<br />
+{{if len(nezauctovane2):}}
+  <i>Pro zaúčtování najdi všechny platby (např. podle částky) a přiřaď je k faktuře.</i>
+  {{pass}}
 
 <br />
 <a href="{{=URL('prehled')}}">Zpět na přehled</a>

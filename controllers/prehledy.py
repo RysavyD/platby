@@ -4,16 +4,69 @@ from datetime import datetime, timedelta, time, date
 from mz_wkasa_platby import Uc_sa
 
 def clenove():
-    clen_id = db(db.auth_group.role=='člen sdružení').select().first().id
+    return _clenove('clen sdruzeni', True)
+
+def hlorg():
+    return _clenove('hlavni organizator', False)
+
+def rada():
+    return _clenove('rada', False)
+
+def dk():
+    return _clenove('dk', False)
+
+def _clenove(skupina, hlavni):
+    response.view = 'prehledy/clenove.html'
+    clen_id = _getgrpid(skupina)
     clenove = db(db.clenstvi.group_id==clen_id).select(
           db.clenstvi.ALL, db.auth_user.nick,
           left=db.auth_user.on(db.auth_user.id==db.clenstvi.user_id),
           orderby=db.auth_user.nick.lower())
-    return dict(clenove=clenove)
+    return dict(clenove=clenove, hlavni=hlavni)
 
-@auth.requires_membership('admin')
+def add_hl_org():
+    _add_x('hlorg', 'hlavní organizátor', "už je hlavním organizátorem", "přidán do seznamu hlavních organizátorů")
+
+def add_rada():
+    _add_x('rada', 'rada', "už je v radě", "přidán do rady")
+
+def add_dk():
+    _add_x('dk', 'dk', "už je v DK", "přidán do DK")
+
+def _add_x(kam_potom, skupina, msg_uz_je, msg_pridan):
+    grp_id = _getgrpid(skupina)
+    if len(request.args)==1:
+        clenstvi = db((db.clenstvi.user_id==request.args[0]) & (db.clenstvi.group_id==grp_id)).select().first()
+        if clenstvi:
+            if clenstvi.do_dne:
+                clenstvi.update_record(do_dne=None)
+                session.flash = msg_pridan
+            else:
+                session.flash = msg_uz_je
+        else:
+            db.clenstvi.insert(user_id=int(request.args[0]), group_id=grp_id)
+            session.flash = msg_pridan
+        redirect(URL(kam_potom))
+
+def _getgrpid(gr_name):
+    grp = db(db.auth_group.role==gr_name).select().first()
+    if not grp:
+        db.auth_group.insert(role=gr_name)
+        db.commit()
+        grp = db(db.auth_group.role==gr_name).select().first()
+    return grp.id
+
+@auth.requires_signature()
+def zrus_clenstvi():
+    if len(request.args)==1:
+        clenstvi = db(db.clenstvi.id==request.args[0]).select().first()
+        if not clenstvi.do_dne:
+            clenstvi.update_record(do_dne=date.today())
+    redirect(URL('default', 'index'))
+
+@auth.requires_membership('vedeni')
 def zakaznici():
-    return dict(grid=SQLFORM.grid(db.auth_user,
+    grid = SQLFORM.grid(db.auth_user,
               fields=(db.auth_user.vs, db.auth_user.ss,
                   db.auth_user.organizator,
                   db.auth_user.nick, db.auth_user.zaloha,
@@ -29,9 +82,13 @@ def zakaznici():
               create=auth.has_membership('pokladna'),
               csv=auth.has_membership('pokladna'),
               paginate=100,
-              orderby=db.auth_user.nick.lower(),
+              orderby=db.auth_user.nick.lower(),  # 'auth_user.nick COLLATE lexical'
+              showbuttontext=False,
               maxtextlengths={'auth_user.email' : 30}
-              ))
+              )
+    search_input = grid.element('#w2p_keywords')
+    search_input and search_input.attributes.pop('_onfocus')
+    return dict(grid=grid)
 
 @auth.requires_login()
 def zadosti():
@@ -66,7 +123,7 @@ def prijmout_clena():     # asi by to chtělo rodné číslo...?
             if not clenstvi1.do_dne:
                 session.flash = "přerušeno - má zahájené členství -> smazat žádost"
                 redirect(URL('zadosti'))
-        clen_id = db(db.auth_group.role=='člen sdružení').select().first().id 
+        clen_id = db(db.auth_group.role=='clen sdruzeni').select().first().id
         auth.add_membership(clen_id, user_id)
         db.clenstvi.insert(user_id=user_id, group_id=clen_id,
                         ode_dne=date.today())
@@ -99,9 +156,10 @@ def zalohu_vratit():
         
         if form.process().accepted:
             zaloha = form.vars.zaloha  # tj. kolik ze zálohy vzít vč. poplatku
-            if zaloha>zakaznik.zaloha:
-                session.flash = "přerušeno - zákazník nemá tolik na záloze"
-                redirect(URL('zadosti'))
+            # toto brani zpracovani po nacteni platby z banky, proto kontrolu vyhazuji 9.6.2015
+            #if zaloha>zakaznik.zaloha:
+            #    session.flash = "přerušeno - zákazník nemá tolik na záloze"
+            #    redirect(URL('zadosti'))
             if zaloha<form.vars.strhnout:
                 session.flash = "přerušeno - stržená částka nestačí na poplatek"
                 redirect(URL('zadosti'))
@@ -207,7 +265,7 @@ def vyrizeno():
                                           prevedeno=request.args[2])
     redirect(URL('zadosti'))
 
-@auth.requires_membership('admin')
+@auth.requires_membership('vedeni')
 def duplicity():
     count = db.pohyb.id.count()
     seznam = db((db.pohyb.idauth_user!=None)

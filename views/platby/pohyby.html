@@ -92,7 +92,7 @@ Inkasa za badmintony 1.10.-6.11. jsou prováděna opožděně - proto jsou řád
 		tablecontent.append(TR(
 				auth.has_membership('pokladna') and TD(pohyb.id) or '',
 				TD(pohyb.datum.strftime('%d.%m.%Y')),
-				TD(pohyb.datum.strftime('%H:%M') if auth.has_membership('admin') else '', _class='slabe'),
+				TD(pohyb.datum.strftime('%H:%M') if auth.has_membership('vedeni') else '', _class='slabe'),
 				TD(vypis_castka, _style="text-align: right;"),
 				TD(interni_ucet),
 				TD(vypis_ucet),

@@ -8,7 +8,7 @@
     <th>Nick</th>
     <th>o ...</th>
     <th>Vyřízeno</th>
-    {{if auth.has_membership('admin'):}}
+    {{if auth.has_membership('vedeni'):}}
     <th>Žádal</th>
     <th>Převedeno</th>
     {{pass}}
@@ -25,7 +25,7 @@
       <a href="{{=URL('vyridit', args=(zadost.zadost.typ, zadost.zadost.id))}}">vyřídit</a>
     {{pass}}
     </td>
-    {{if auth.has_membership('admin'):}}
+    {{if auth.has_membership('vedeni'):}}
     <td style="text-align:right;">{{=zadost.zadost.zadano or ''}}</td>
     <td style="text-align:right;">{{=B(zadost.zadost.prevedeno or '')}}</td>
     {{pass}}

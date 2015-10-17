@@ -1,3 +1,63 @@
+<<<<<<< HEAD
+# mz updates
+.pythonhistory
+_bk/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+=======
 *.tmp
 *.bak
 *.bk
@@ -31,11 +91,14 @@ develop-eggs/
 
 uploads/
 downloads/
-databases/*.*
-cache/*.*
-private/*.*
-errors/*.*
+databases/
+cache/
+private/
+errors/
+mail_attachments/
+sessions/
 sessions/*.*
 
 .installed.cfg
 pip-log.txt
+>>>>>>> 463933ba5e04d5ee9b4ea98c283bf726d1c7bb9a

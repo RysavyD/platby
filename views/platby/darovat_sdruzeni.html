@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+
+<h2>Darovat částku
+{{if nick:}}
+z kreditu {{=nick}} pro sdružení
+{{else:}}
+z vlastního kreditu pro sdružení
+{{pass}}
+</h2>
+
+{{=form}}

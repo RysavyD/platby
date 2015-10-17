@@ -1,0 +1,15 @@
+{{extend 'layout.html'}}
+
+<table>
+{{for dluh in dluhy:}}
+    {{castka = int(round(dluhy[dluh][0]))}}
+    {{if castka:}}
+        <tr>
+            <td>{{=dluh}}</td>
+            <td style="text-align: right;">{{=castka}}</td>
+            <td>{{=dluhy[dluh][1]}}</td>
+            <td><a href="{{=URL('pokladna', args=dluhy[dluh][2])}}">{{=dluhy[dluh][2]}}</a></td>
+        </tr>
+    {{pass}}
+{{pass}}
+</table>

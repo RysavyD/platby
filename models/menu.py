@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-aktualita = "Fungujeme už má svoji doménu: www.fungujemeaktivne.cz" 
+aktualita = "Od 23.4.15 je zvoleno nové vedení sdružení - Rada: Nerothar, Du-šan, Mára, DK: Leni79, Manik"
 
 response.title = T('wKasa')
 response.subtitle = T('webová pokladna')
@@ -23,49 +23,60 @@ response.google_analytics_id = None
 response.menu = []
 if auth.user:
     response.menu.append((T('Zákazník'), False, URL('info', 'coajak'), [
-            (T('Přehled a žádosti o převody'), False, URL('platby', 'prehled'), []),
+            (T('Přehled a žádost o vrácení os.zálohy'), False, URL('platby', 'prehled'), []),
             (T('Pohyby na záloze'), False, URL('platby', 'pohyby'), []),
             (TFu('Věnovat peníze jiné(mu)'), False, URL('platby', 'venovat'), []),
+            (TFu('Darovat peníze sdružení'), False, URL('platby', 'darovat_sdruzeni'), []),
             ]))
 else:
     if not (request.controller=='default' and request.function=='index'):
         response.menu.append((T('Před přihlášením'), False,
                 URL('default', 'index'), []))
 response.menu.append((T('Informace'), False, URL('info', 'coajak'), [
-            (T('Co a jak'), False, URL('info', 'coajak'), []),
+            (T('Jak platit'), False, URL('info', 'coajak'), []),
+            (T('Můžu ošidit jedinou platbu?'), False, URL('info', 'poprve'), []),
             (T('O sdružení'), False, URL('info', 'sdruzeni'), []),
-            (T('O Fungujeme'), False, URL('info', 'fungujeme'), []),
+            (T('O FungujemeAktivne'), False, URL('info', 'fungujeme'), []),
             (T('O spolecneaktivity.cz'), False, URL('info', 'jp'), []),
             (T('Pro organizátory'), False, URL('info', 'organizatori'), []),
-            (T('Pro organizace: Účtovat na spolecneaktivity.cz?'), False, URL('info', 'varovani'), []),
+            (T('Pro pokladníka'), False, URL('info', 'pokladnik'), []),
             ]))
 subpostak = [
-            (T('Zaslat mail'), False, URL('postak', 'zaslat'), []),
             ]
-if auth.has_membership('admin'):
+if auth.has_membership('vedeni'):
     subpostak.append((T('Hromadný mail'), False,
               URL('postak', 'zakaznikum'), []))
-response.menu.append((T('Pošťák'), False, URL('postak', 'zaslat'), subpostak))
+response.menu.append((T('Pošťák'), False, None, subpostak))
 
 if auth.user and auth.user.organizator:
-    response.menu.append((T('Záznamy do pokladny'), False,
-              URL('organizator', 'pokladna'), []))        
+    suborganizator = [(T('Záznamy do pokladny'), False, URL('organizator', 'pokladna'), []),]
+    if auth.has_membership('vedeni'):
+        suborganizator.append((T('Dluhy'), False, URL('organizator', 'dluhy'), []))
+    response.menu.append((T('Záznamy do pokladny'), False, URL('organizator', 'pokladna'), suborganizator))
 
-subprehledy = [
+subclenstvi = [
             (T('Členové sdružení'), False, URL('prehledy', 'clenove'), []),
+            (T('Hlavní organizátoři'), False, URL('prehledy', 'hlorg'), []),
+            (T('Rada'), False, URL('prehledy', 'rada'), []),
+            (T('Dozorčí komise'), False, URL('prehledy', 'dk'), []),
             ]
-if auth.has_membership('admin'):
+subprehledy = [
+            (T('Členství'), False, URL('prehledy', 'clenove'), subclenstvi),
+            ]
+if auth.has_membership('vedeni'):
     subprehledy.append((T('Zákazníci'), False,
-              URL('prehledy', 'zakaznici'), []))        
+              URL('prehledy', 'zakaznici'), []))
 subprehledy.append((T('Čísla a ceny akcí'), False,
         URL('home', 'xml', '', scheme='http', host='www.fungujemeaktivne.cz'), []))        
 if auth.user:
     subprehledy.append((T('Podané žádosti'), False,
               URL('prehledy', 'zadosti'), []))        
-if auth.has_membership('admin'):
+if auth.has_membership('vedeni'):
     subprehledy.append((T('Jednoduché'), False,
               None, [
-              (T('pokladna'), False,
+              (TFu('všechny výdaje'), False,
+                        URL('jednoduche', 'vydaje'), []),
+              (TFu('pokladna'), False,
                         URL('jednoduche', 'pokladna'), []),
               (TFu('výběry z bankomatu'), False,
                         URL('jednoduche', 'atm'), []),
@@ -75,10 +86,14 @@ if auth.has_membership('admin'):
                         URL('jednoduche', 'bu'), []),
               ]))
     podvojne = [
-              (T('neformátované za 2 měsíce'), False,
-                        URL('podvojne', 'nedavne', args=1), []),
+              (T('používané účty'), False,
+                        URL('zaverky', 'osnova'), []),
+              (T('všechny pohyby'), False,
+                        URL('podvojne', 'vsechny'), []),
               (T('pohyby za 2 měsíce'), False,
                         URL('podvojne', 'nedavne'), []),
+              (T('vyhledat částku'), False,
+                        URL('podvojne', 'castka'), []),
               (T('navýšení zálohy'), False,
                         URL('podvojne', 'zal_plus'), []),
               (T('za akce Fungujeme'), False,
@@ -90,10 +105,16 @@ if auth.has_membership('admin'):
               (T('chybí účet'), False,
                         URL('podvojne', 'chybi'), []),
             ]
+    zaverky = [
+              (T('roční závěrky (daňová přiznání)'), False,
+                        URL('zaverky', 'dp'), []),
+              (T('závěrky (původní verze)'), False,
+                        URL('zaverky', 'obdobi'), []),
+            ]
     if auth.has_membership('pokladna'):
         podvojne.append((TFu('Přidat záznam'), False, URL('prehledy', 'pridat_pohyb'), []))
-    subprehledy.append((T('Podvojné'), False, None, podvojne))
-    subprehledy.append((TFu('Závěrky'), False, URL('zaverky', 'obdobi'), []))
+    subprehledy.append((TFu('Podvojné'), False, None, podvojne))
+    subprehledy.append((TFu('Závěrky'), False, None, zaverky))
     subprehledy.append((TFu('Partneři'), False, URL('partneri', 'prehled'), []))
     subprehledy.append((TFu('Faktury'), False,
               None, [

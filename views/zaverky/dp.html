@@ -1,0 +1,43 @@
+{{extend 'layout.html'}}
+
+<p>Začínáme od {{=iniciovano_ke_dni.strftime('%d.%m.%Y')}} (pevně dáno poslední provedenou závěrkou).</p>
+
+{{if ziskano or prevedeno:}}
+  <h2>Tržby za akce</h2>
+  <p><i>částka je kumulativní</i></p>
+
+  <table>
+  {{for mesic in ziskano_mesice:}}
+    <tr>
+      <td>{{=mesic[0]}}</td>
+      <td style="text-align: right;">{{=mesic[1]}}</td>
+      <td style="text-align: right;">{{=int(round(mesic[2]))}}</td>
+    </tr>
+    {{pass}}
+  </table>
+
+  {{if prevedeno:}}
+    <p>Z toho bylo převedeno do výnosů {{=int(round(prevedeno))}}, naposledy ke dni {{=prevedeno_dne.strftime('%d.%m.%Y')}}</p>
+    {{pass}}
+
+  {{pass}}
+
+{{if len(permice_out):}}
+  <h2>Už zapsané záznamy o spotřebě permanentek:</h2>
+  <table>
+  {{for permice in permice_out:}}
+    <tr>
+      <td>{{=permice.datum.strftime('%d.%m.%Y')}}</td>
+      <td style="text-align: right;">{{=int(round(permice.castka))}}</td>
+    </tr>
+    {{pass}}
+  {{if out_celkem>0:}}
+    <tr><td>celkem</td><td>{{=int(round(out_celkem))}}</td></tr>
+    {{pass}}
+  </table>
+  {{pass}}
+
+<h2>Převod do výnosů a snížení stavu permanentek</h2>
+{{=form}}
+<p><i>Celková částka, ponechaná na permanentkách, nesmí být větší než {{=int(round(permice_max))}}.</i></p>
+<p><strong>{{=problem}}</strong></p>

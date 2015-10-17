@@ -1,7 +1,7 @@
 {{right_sidebar_enabled = True}}
 {{extend 'layout.html'}}
 
-<h4>Mail všem zákazníkům sdružení (kromě neregistrovaných 675+)</h4>
+<h4>Mail zákazníkům (Z), členům (C) nebo organizátorům (O) sdružení</h4>
 <p>Lze zaslat 1 hromadný mail denně. Mail bude odeslán po 5.hodině ráno a do té doby se kdykoli stejnou volbou zobrazí k dodatečné opravě.</p>
 
 <p>Vždy při uložení bude mail na zkoušku zaslán na Tvůj mail</p>
@@ -11,6 +11,10 @@
 {{pass}}
 
 <div class="obly modry">
+<p>
+  Přílohy: <strong>{{=len(prilohy)}}</strong> <a href="{{=URL('smaz_prilohy')}}">přílohy smazat a neodesílat</a><br />
+  <em>Přílohy lze zatím zadat jen FTP uploadem do adresáře mail_attachments/ - Po odeslání tam neponechávej nesmazané soubory (hrozí překročení limitu 10MB free hostingu na alwaysdata).</em>
+</p>
 {{=form}}
 </div>
 

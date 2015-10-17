@@ -1,7 +1,22 @@
 # -*- coding: utf8 -*-
 
+'''TODO:
+308 Ludek - dlouho neaktivni - opravit zalohu na 0 (nyni -290 po chybnem prirazeni platby za hosting)
+pridat admin prava Marovi a sebrat je Potapkovi
+'''
+
 mail_subj = Uc_sa.mail_subj
 podpis = Uc_sa.podpis
+
+def err():
+    a = 1/0
+
+'''
+def nero():
+    db.auth_user[1135] = dict(zaloha=960.0)
+    db.commit()
+    return 'ok'
+'''
 
 '''zatím nedořešené pohyby:
 chybná platba:
@@ -24,7 +39,7 @@ proplacená faktura:
 (1555,),16.11. 2700
 '''
 
-
+"""
 def setnick():
     '''doplní zákazníka pohybu podle nicku; nemění zálohu'''
     if len(request.args)==2:
@@ -88,7 +103,28 @@ def mikruse():
     db.clenstvi.insert(user_id=user_id, group_id=clen_id,
                     ode_dne=date(2013,10,XXXXXXXXXX))
 
-'''
+def grps():
+    db(db.auth_group.role.startswith('user_')).delete()
+    db.auth_group[12] = dict(role='clen sdruzeni')
+    db.auth_group[42] = dict(role='hlavni organizator')
+    del db.auth_group[47]
+
+def addu():
+    db.ucet.insert(ucet='221-01', zkratka='BÚj', nazev="Jmění")
+    db.ucet.insert(ucet='221-12', zkratka='d12', nazev="Odklad základu daně 2012")
+    db.ucet.insert(ucet='221-13', zkratka='d13', nazev="Odklad základu daně 2013")
+    db.ucet[26].update_record(zkratka='X-Y')
+    db.commit()
+
+def vetrelci():
+    for i in xrange(1275, 1286):
+        del db.auth_user[i]
+    return 'ok'
+def xludek():
+    db.pohyb[1448] = dict(idauth_user=None)
+    db.pohyb[1449] = dict(idauth_user=None)
+    return 'ok'
+
 def katar():
     db.auth_user[1251] = dict(zaloha=500.0)
 
@@ -356,11 +392,11 @@ def silv0():         # Voi
     db.commit()
 
 def odmeny():
-    """
+    '''
     1) za weby: du-san 4000 (rozděluje: 3000 on, 1000 Manik), mirek zvolsky 1000
     2) za organizacni cinnost: nerothar 1000 (bdm), roman cervenka 1500 (silvestr)
     3) za praci pro sdruzeni: effa 2000, potapeni.cz 2000, bobo 2000. (Rada), Du-san 1000, Nerothar 1000 (dk)
-    """
+    '''
     odmenu(1070, 269, 4000)  #du-san
     odmenu(1024, 315, 1000)  #manik
     odmenu(992, 347, 1000)   #mirek zv.
@@ -996,7 +1032,7 @@ def init_systab():
             kod='csv_czk', hodnota='125197.60')
     db.commit()
     return 'systab: nastaveno'
-'''
+"""
 
 #if __name__=='__main__':
 #    antikraken()

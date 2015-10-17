@@ -1,0 +1,43 @@
+{{right_sidebar_enabled = True}}
+{{extend 'layout.html'}}
+
+<h5>Platím jedinou akci - a je to na mě složité - můžu to nějak ošidit ?</h5>
+
+<p><i>No... Budeme radši, když se touhle cestou nevydáš. Trochu leccos komplikuje - organizátorovi, pokladníkovi.<br />
+Máš tedy nehynoucí zásluhy, jestliže se k pokladnímu systému <a href="{{=URL('default', 'index')}}">normálně přihlásíš</a>,
+získáš svůj variabilní symbol a zaplatíš předem na účet (pamatuj, že Fungujeme si načte platbu bez problémů, když máš i v pokladně stejný e-mail a nejlépe i stejný nick).<br />
+Nicméně ....</i></p>
+
+<p><b>Jestliže chceš jedinou akci zaplatit <i>mimo systém</i></b>, je potřeba,
+<ul>
+  <li>aby ses buď dobře znal(a) s organizátorem a on Ti bezmezně důvěřoval (že skutečně na akci přijdeš a zaplatíš na místě)</li>
+  <li>nebo abys za organizátorem zajel(a) a zaplatil(a) mu předem.</li>
+</ul>
+</p>
+
+<p><b>Pokud ses tedy opravdu rozhodl(a) zaplatit takto:</b>
+<ul>
+  <li>domluv se s organizátorem, zda Ti to dovolí,</li>
+  <li>do účasti k akci se nepřihlašuj (nejvýše napiš do diskuze, že pojedeš),</li>
+  <li>organizátora požádej, ať Ti místo(a) rezervuje: <i>na Fungujeme zvýší počet účastníků ve volbě Akce, Externí účastníci</i>,</li>
+  <li>zaplať předem nebo na místě</i>,</li>
+  <li>připomeň organizátorovi, ať platbu zapíše do webové pokladny.</li>
+</ul>
+</p>
+
+<p>Poznámka:<br />
+<i>Jsi-li ohlášen jako Externí účastník (nebo vůbec nepřihlášen), organizátor zapíše tvoji platbu do pokladny volbou "Hotovostní příjem (host,..)".<br /><br />
+Můžeš se také přihlásit na Fungujeme normálně svým jménem, v tom případě organizátor musí zapsat Tvou platbu volbou "Platba od přihlášeného za placenou akci".<br />
+Fungujeme si pak peníze vezme, až je organizátor takto zapíše. - Z toho ale plyne, že nezaplatíš-li předem, vzniknou Ti při naposledy zmíněné variantě potíže s propadáním rezervace.</i>
+</p>
+
+{{=A('předchozí text', _href=URL('coajak'))}} --
+{{=A('další text', _href=URL('sdruzeni'))}}
+
+{{block right_sidebar}}
+{{include 'incl/bocni.html'}}
+{{end}}
+
+{{block footer}}
+{{include 'incl/kdojekdo.html'}}
+{{end}}

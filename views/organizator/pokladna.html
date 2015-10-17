@@ -11,25 +11,27 @@ S pokladnou jsem vyrovnán.
 </b></p>
 
 <p>
-Pohyb může zapsat nejen organizátor, ale i pokladník.<br />
+Pohyb může zapsat nejen organizátor, ale i pokladník.
 Před připsáním do pokladny se proto podívej, jestli už pohyb není zapsaný.
 </p>
 
 <p>
-Momentálně tu nemáme možnost opravy.<br />
+Momentálně tu nemáme možnost opravy.
 Pokud se spleteš, zavolej nebo napiš pokladníkovi: 732457966 zvolsky@seznam.cz
 </p>
 
-<p>
+<ul>
 <b>Zapsat do pokladny:</b>
--- <a href="{{=URL('hotov_prijem')}}">hotovostní příjem</a>
--- <a href="{{=URL('hotov_vydaj')}}">výdaj</a>
--- <a href="{{=URL('pokladnikovi')}}">předání peněz pokladníkovi</a>
--- <a href="{{=URL('od_pokladnika')}}">převzetí peněz od pokladníka</a>
+<li><a href="{{=URL('dar')}}">příjem daru/příspěvku</a></li>
+<li><a href="{{=URL('strhnout')}}">platba od přihlášeného(!) za placenou(!) akci</a> <small>(není-li stržen od Fungujeme, navýší osobní zálohu)</small></li>
+<li><a href="{{=URL('hotovka')}}">hotovostní příjem ostatní (host, účastník navíc, apod.)</a> <small>(nejde na osobní zálohu, ale do tržeb sdružení)</small></li>
+<li><a href="{{=URL('hotov_vydaj')}}">výdaj</a> <small>(doklad doprav pokladníkovi nejpozději do následujícího února)</small></li>
+<li><a href="{{=URL('pokladnikovi')}}">předání peněz pokladníkovi</a></li>
+<li><a href="{{=URL('od_pokladnika')}}">převzetí peněz od pokladníka</a> <small>(hotovost; zaslání na účet nezapisuj)</small></li>
 {{if auth.has_membership('pokladna'):}}
--- <a href="{{=URL('cokoliv')}}">cokoliv</a>
+<li><a href="{{=URL('cokoliv')}}">cokoliv</a></li>
 {{pass}}
---</p>
+</ul>
 
 {{if zapisy:}}
   <div class="obly modry">
@@ -43,9 +45,9 @@ Pokud se spleteš, zavolej nebo napiš pokladníkovi: 732457966 zvolsky@seznam.c
         status=''
       elif zapis.pohyb.ks=='11':
         status='předat peníze a doklad'
-      elif zapis.pohyb.ks[0]=='1':
+      elif zapis.pohyb.ks and zapis.pohyb.ks[0]=='1':
         status='předat peníze'
-      elif zapis.pohyb.ks[1]=='1':
+      elif zapis.pohyb.ks and zapis.pohyb.ks[1]=='1':
         status='předat doklad'
       elif '?' in zapis.pohyb.ks:
         status='vyjasnit'

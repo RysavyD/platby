@@ -1,16 +1,29 @@
-{{right_sidebar_enabled = True}}
 {{extend 'layout.html'}}
 
-<h5>Pro organizátory předem placených akcí</h5>
-
-<p>Organizátoři předem placených akcí <b>musí zajistit výdajové doklady</b> (faktury - daňové doklady, příjmové doklady nebo pokladní stvrzenky) k výdajům, které sdružení proplatí. V opačném případě bychom totiž museli všechny platby účastníků akcí zdanit, jako by se jednalo o zisk sdružení - což by samozřejmě nesmyslně prodražovalo účast na akcích.</p>
-
-<p>Doklady se předávají a peníze se vyrovnávají s pokladníkem sdružení.</p>
-
-<p>Všechny příjmy, které organizátor získá od účastníků, a všechny výdaje, které učiní, musí být co nejdříve po transakci zapsány na tento web. Dále musí být zaznamenána všechna předání peněz mezi organizátorem a pokladníkem (ať už je na web zapíše organizátor nebo pokladník).</p>
+<h5>Pro organizátory</h5>
 
 <div class="obly modry">
-<p>Organizuješ-li placené akce, nastav si v {{if auth.user:}}<a href="{{=URL('default', 'user', args='profile')}}">profilu</a>{{else:}}profilu{{pass}} předvolbu Organizátor placených akcí - přibyde Ti nová volba menu Záznamy do pokladny. Pomocí této volby zapisuj všechny výše uvedené příjmy a výdaje.</p> 
+<p>Zaškrtneš-li si v {{if auth.user:}}<a href="{{=URL('default', 'user', args='profile')}}">profilu</a>{{else:}}profilu{{pass}} předvolbu Organizátor akcí, budeš dostávat případné zprávy, rozeslané organizátorům a získáš možnost samostatně zapisovat příjmy a výdaje a sledovat, kolik peněz je třeba si předat s pokladníkem - přibyde Ti nová volba menu Záznamy do pokladny.</p>
+</div>
+
+<p>Zjistíš-li, že nemáš práva k vyhlášení akce na FungujemeAktivne.cz, jednej s Radou Sdružení - seznam je se svým záměrem, a Rada Ti zajistí nastavení potřebných oprávnění.</p>
+
+<div class="obly zluty">
+<p>Akce lze pořádat <b>nepředplacené</b>, ale jestliže je třeba něco závazně objednat, nemáš žádnou záruku, že přihlášení opravdu přijdou a zaplatí.</p>
+
+<p>Proto jsou tu i <b>předplacené</b> akce. K jejich vyhlášení si musíš s Radou domluvit Tvé zařazení mezi Hlavní organizátory, nebo musíš <a href="{{=URL('prehledy', 'hlorg')}}">některého hlavního organizátora vyhledat</a> a akci vyhlásit ve spolupráci s ním.</p>
+</div>
+
+<p><b>Pozor: Předplacené akce tu nejsou proto, aby Sdružení krylo ztrátu z akce.</b> <small>(To je možné jedině ve výjimečných případech, jestliže to má pro Sdružení jiný přínos a je to předem domluveno.)</small> Proto <b>před prvním výdajem za akci nebo potvrzením závazné objednávky musíš mít tolik přihlášených, aby náklady pokryli.</b> Před toto datum také dej "Čas posledního vrácení peněz", protože do tohoto data se účastníci mohou bez sankcí odhlašovat. Pokud <b>před prvním výdajem nebo závaznou objednávkou nemáš dost přihlášených (zajištěných příjmů), akci zruš nebo konzultuj s Radou</b>, zda ji zrušit nebo ponechat. <b>Pokud toto porušíš, musíš uhradit celou případnou ztrátu z akce.</b></p>
+
+<p>Za akci <b>musíš zajistit výdajové doklady</b>, to je vždy příjmový doklad za zaplacenou hotovost (pokladní stvrzenka, paragon) a v případě, že platíme z bankovního účtu je to faktura (má zahrnovat celou částku, tj. i hotovostní doplatky).</p>
+
+<p>Všechny <b>výdaje a příjmy v hotovosti (peníze, zaplacené účastníky na místě) zapiš do "Záznamy do pokladny".</b> Tam pak uvidíš, kolik Ti má proplatit pokladník nebo Ty doplatit jemu. Jakmile dojde k tomuto vyrovnání, zapíšeš jej Ty nebo pokladník, a pak se bude zobrazovat, že už si nic nedlužíte.<br />
+Pozn.: <em>Příjmy lze zapsat jako <b>dar</b> nebo jako <b>hotovostní příjem ostatní (třeba za hosta)</b> - na ty není potřeba dávat pozor, jsou to přímo příjmy Sdružení. Není ani nutné vyplňovat nick účastníka, takže lze zapsat i příjmy za víc lidí hromadně. Ale třetí variantu <b>"platba od přihlášeného za placenou akci" používej opatrně</b>: jen když je dotyčný osobně přihlášen na akci na webu (v Rezervaci nebo v Účasti) a když správně vybereš ze seznamu jeho nick: navýšíš mu tím totiž osobní zálohu a do příjmů sdružení budou peníze převedeny jedině tehdy, když si je FungujemeAktivne.cz úspěšně strhne (právě proto musí být použit správný nick a musí být přihlášen na akci na webu).</em>
+</p>
+
+<div class="obly modry">
+<p>Pamatuj: Všechny příjmy, které organizátor získá od účastníků, a všechny výdaje, které učiní, musí být co nejdříve po transakci zapsány na tento web. Dále musí být zaznamenána všechna předání peněz mezi organizátorem a pokladníkem (ať už je na web zapíše organizátor nebo pokladník).</p>
 </div>
 
 {{=A('předchozí text', _href=URL('jp'))}}

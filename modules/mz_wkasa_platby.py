@@ -85,12 +85,16 @@ def fix_vs(db, auth, vs_default):
     Pozor: Předpokládá existenci záznamu s předchozím přiděleným číslem!
     '''
     if auth.user.vs==vs_default:
-        mx = db.auth_user.vs.max()
-        last_vs = db(db.auth_user.vs!=vs_default).select(mx).first()[mx]
-        new_vs = str(int(last_vs) + 1)
+        new_vs = get_new_vs(db, vs_default)
         db(db.auth_user.id==auth.user_id).update(vs=new_vs)
         db.commit()
         auth.user.vs = new_vs
+
+def get_new_vs(db, vs_default):
+    mx = db.auth_user.vs.max()
+    last_vs = db(db.auth_user.vs!=vs_default).select(mx).first()[mx]
+    # nejsem si jisty, jak to pracuje pro string, ale v rozsahu 80000-99999 to bude Ok
+    return str(int(last_vs) + 1)
 
 def loginlog(db, auth):
     '''loguje datum použití aplikace

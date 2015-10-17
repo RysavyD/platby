@@ -3,30 +3,33 @@
 <h2>Přijaté faktury</h2>
 {{=grid}}
 
-<br /><br />
-<a href={{=URL('zauctovani')}}>Kontrola zaúčtování</a>
-<br /><br />
+{{if not request.args:}}
+    <br /><br />
+    <i>Nezapomeň předem nalézt platby (např. podle částky), opravit MD na 314 nebo 321, a doplnit odkaz na fakturu.</i><br />
+    <a href={{=URL('zauctovani')}}>Kontrola zaúčtování</a>
+    <br /><br />
 
-Zaúčtování faktur provádíme takto:<br />
-<table>
-<tr><td>314</td>     <td>221|211</td>  <td>vyplacena záloha na akci</td></tr>
-<tr><td>321</td>     <td>314</td>      <td>zúčtování zálohy, jakmile máme fakturu</td></tr>
-<tr><td>518|548</td> <td>321</td>      <td>přijatá faktura ke dni přijetí (neproplacená část je závazek)</td></tr>
-<tr><td>321</td>     <td>221|211</td>  <td>doplacení faktury k datu úhrady</td></tr>
-</table>
+    <b>Zaúčtování faktur se provádí takto:</b><br />
+    <table>
+    <tr><td>314</td>     <td>221|211</td>  <td>vyplacena záloha na akci</td></tr>
+    <tr><td>321</td>     <td>314</td>      <td>zúčtování zálohy, jakmile máme fakturu</td></tr>
+    <tr><td>518|548</td> <td>321</td>      <td>přijatá faktura ke dni přijetí (neproplacená část je závazek)</td></tr>
+    <tr><td>321</td>     <td>221|211</td>  <td>doplacení faktury k datu úhrady</td></tr>
+    </table>
 
-U pohybů (výdajů) je třeba zadat přijatou fakturu, pokud se k některé vztahovaly<br /><br />
-U každé faktury se kontroluje,<br />
-<ul>zda je evidována záznamem 5../321:
-    <li>ne: záznam se vytvoří jako náklad podle fp.md</li>
-    <li>ano, ale nesouhlas částky nebo fp.md: reportováno</li>
-</ul>
-<ul>zda, je-li k ní proplacena záloha, existuje její zúčtování 321/314:
-    <li>ne: zúčtování se doplní</li>
-</ul>
-<ul>zda je proplacena - sečtením částek 321:
-    <li>ano a prázdné datum úhrady: doplní se datum úhrady podle poslední platby</li>
-    <li>ne: reportováno</li>
-    <li>nesouhlas data úhrady: reportováno</li>
-</ul>
-Má-li faktura vše v pořádku, uznačí se jako Zaúčtovaná.
+    <p><b>U pohybů (výdajů), které se vztahovaly k fakturám, je třeba zadat přijatou fakturu. MD účet musí být 314 nebo 321.</b></p>
+    <p>U každé faktury se kontroluje,<br />
+    <ul>zda je evidována záznamem 5../321:
+        <li>ne: záznam se vytvoří jako náklad podle fp.md</li>
+        <li>ano, ale nesouhlas částky nebo fp.md: reportováno</li>
+    </ul>
+    <ul>zda, je-li k ní proplacena záloha, existuje její zúčtování 321/314:
+        <li>ne: zúčtování se doplní</li>
+    </ul>
+    <ul>zda je proplacena - sečtením částek 321:
+        <li>ano a prázdné datum úhrady: doplní se datum úhrady podle poslední platby</li>
+        <li>ne: reportováno</li>
+        <li>nesouhlas data úhrady: reportováno</li>
+    </ul>
+    Má-li faktura vše v pořádku, uznačí se jako Zaúčtovaná.</p>
+    {{pass}}

@@ -1,0 +1,21 @@
+{{extend 'layout.html'}}
+
+<h5>Pro pokladníka (účetní postupy)</h5>
+
+<h6>Vrácení přeplatku z akce účastníkovi hotově</h6>
+
+<div class="obly modry">
+<p>Při přihlášení na akci se sníží disponibilní osobní záloha účastníka a zvýší osobní záloha ve správě Fungujeme (připravená k převedení do výnosů, pokud nebudeme vracet): MD 379-09 Dal 379-12.</p>
+<p>Při hotovém vrácení přeplatku nemanipulujeme s osobní zálohou (ta už byla snížena), ale potřebujeme snížit osobní zálohu ve správě Fungujeme (neboť do výnosů půjde méně): MD 379-12 Dal 211.<br />
+U tohoto pohybu uvedeme účastníka, který pak bude ve svém přehledu správně vidět, že mu byly vráceny peníze (nic jiného se mu nezmění).</p>
+<p>Vyplatí-li peníze fyzicky organizátor, který je měl jako zálohu organizátora (účet 211-01), může se změnit takto: MD 379-12 Dal 211-01. [není ověřeno, že se organizátorovi správně zobrazí jeho bilance]<br />
+nebo může (jakoby) zálohu organizátora vrátit do hlavní pokladny a vyplacení se provede z hlavní pokladny: MD 211 Dal 211-01, MD 379-12 Dal 211 (zde uvést účastníka).</p>
+</div>
+
+{{block right_sidebar}}
+{{include 'incl/bocni.html'}}
+{{end}}
+
+{{block footer}}
+{{include 'incl/kdojekdo.html'}}
+{{end}}

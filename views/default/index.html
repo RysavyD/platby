@@ -9,9 +9,12 @@
 
 <div class="obly modry initsel" id="initsel_login"><b>Na tyto stránky se už vracím opakovaně</b> - <a href="{{=URL('user', args=('login','vracim_se'))}}" id="a_login">přihlaš se</a></div>
 
-<div class="obly modry initsel" id="initsel_mail"><b>Jsem zákazníkem sdružení</b> už ze stránek spolecneaktivity.cz a <b>můj osobní symbol je v rozsahu od 101 do 674</b> <small>(na spolecneaktivity.cz je to specifický symbol)</small> - Tvůj profil už je vytvořen a platby v něm evidovány - <a href="{{=URL('user', args=('request_reset_password',))}}" id="a_mail">přístup získáš zde</a> <small>tím, že zaslaný mail Ti umožní si nastavit heslo. Mail pošleme na mailovou adresu, pod kterou jsi registrován na spolecneaktivity.cz.</small></div>
+<div class="obly modry initsel" id="initsel_mail"><b>Jsem už registrován přihlášením na fungujemeaktivne.cz</b> <small>od března 2015</small> *)<b>, ale ještě jsem tu nebyl</b> - <a href="{{=URL('user', args=('request_reset_password',))}}" id="a_mail">přístup získáš zde</a> stejně jako když neznáš heslo: zaslaný mail Ti umožní si heslo nastavit. Použij mailovou adresu jako při původní registraci.</div>
 
-<div class="obly modry initsel" id="initsel_register"><b>Ani jedno z předchozího</b> není můj případ <small>(toto vyber i v případě, že máš osobní symbol ze spolecneaktivity.cz <b>675 a větší</b>)</small> - <a href="{{=URL('user', args=('register','opravdu_novy'))}}" id="a_register">zaregistruj se</a></div>
+<div class="obly modry initsel" id="initsel_register"><b>Ani jedno z předchozího</b> není můj případ - <a href="{{=URL('user', args=('register','opravdu_novy'))}}" id="a_register">zaregistruj se</a></div>
+<small style="float: right;">*) nebo na spolecneaktivity.cz v prehistorii (do r.2013) pod číslem do 674</small>
+
+<br /><br /><p><span class="obly zluty"><a href="{{=URL('info', 'poprve')}}"><strong>Platím jen jednou - můžu nějak ošidit jedinou platbu ?</strong></a></span></p>
 
 {{block header}}
   {{if aktualita:}}

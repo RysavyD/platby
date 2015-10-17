@@ -26,10 +26,10 @@ def user():
     
     if request.args(0)=='login':
         db.auth_user.email.comment = TFu(
-            'e-mail, pod nímž jsi zde registrován (při prvním přihlášení zákazníka se spec.sym. 101-674 z registrace na spolecneaktivity.cz si nejprve nastav heslo pomocí "Zapomněl jste heslo"/"Nastavit nové heslo")')
+            'e-mail, pod nímž jsi zde registrován (přihlašuješ-li se poprvé na mail z fungujemeaktivne.cz, nejprve si nastav heslo pomocí "Zapomněl jste heslo"/"Nastavit nové heslo")')
     elif request.args(0)=='request_reset_password':
         db.auth_user.email.comment = TFu(
-            'e-mail, pod nímž jsi zde registrován (při prvním přihlášení zákazníka se spec.sym. 101-674 použij mail z registrace na spolecneaktivity.cz)')
+            'e-mail, pod nímž jsi zde registrován (pokud ses ještě nepřihlašoval, vyplň mail z fungujemeaktivne.cz (nebo z registrace na spolecneaktivity.cz před r.2013))')
 
     #       login z menu jde na úvodní stránku;
     #       správný musí mít další (dummy) parametr 

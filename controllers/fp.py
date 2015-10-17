@@ -1,17 +1,29 @@
 # coding: utf8
 
-@auth.requires_membership('admin')
+@auth.requires_membership('pokladna')
+def edit():
+    fp = db.fp(request.args(0)) or redirect('fp', 'prehled')
+    form = SQLFORM(db.fp, fp)
+    if form.process().accepted:
+        redirect('fp', 'prehled')
+    return dict(form=form)
+
+@auth.requires_membership('vedeni')
 def prehled():
     return dict(grid=SQLFORM.grid(db.fp,
-              fields=[db.fp.zauctovana, db.fp.vystaveno, db.fp.uhrazeno,
-                  db.fp.no_jejich, db.fp.castka, db.fp.poznamka
+              left=db.partner.on(db.fp.partner_id==db.partner.id),
+              fields=[db.fp.id, db.fp.zauctovana, db.fp.vystaveno, db.fp.uhrazeno,
+                  db.fp.no_jejich, db.fp.castka, db.partner.nazev, db.fp.poznamka
                   ],
-              deletable=auth.has_membership('pokladna'),
+              #links=dict(header='pohyby',
+              #    body=lambda row: A('v', _href=URL('pohyby', args=row.fp.id))),
+              deletable=False,
               editable=auth.has_membership('pokladna'),
               create=auth.has_membership('pokladna'),
-              csv=auth.has_membership('admin'),
+              csv=auth.has_membership('vedeni'),
               paginate=100,
               orderby=db.fp.vystaveno,
+              showbuttontext=False,
               maxtextlengths={'fp.poznamka' : 40}
               ))
 
@@ -30,17 +42,22 @@ def zauctovani():
     for faktura in nezauctovane1:
         if faktura.castka>0:
             problem = False
-            protokol += 'id %s: %s %s' % (faktura.id,
+            protokol += '<a href="%s">id %s</a>: %s %s' % (
+                        URL('fp', 'edit', args=faktura.id), faktura.id,
                         faktura.prijato and faktura.prijato.strftime('%d.%m.%Y') or '??', faktura.castka)
             
-            # je evidována záznamem 5../321 ?
+            # uplatněna do nákladů? je evidována záznamem 5../321 ?
             prijata = db((db.pohyb.fp_id==faktura.id) & (db.pohyb.iddal==Uc_sa.fp)).select()
             if len(prijata)==0:
                 # ne: záznam se vytvoří jako náklad podle fp.md
-                db.pohyb.insert(idma_dati=faktura.md, iddal=Uc_sa.fp,
-                        castka=faktura.castka, datum=faktura.prijato,
-                        fp_id=faktura.id, partner_id=faktura.partner_id)
-                protokol += ' +5../321'
+                if faktura.md:
+                    db.pohyb.insert(idma_dati=faktura.md, iddal=Uc_sa.fp,
+                            castka=faktura.castka, datum=faktura.prijato,
+                            fp_id=faktura.id, partner_id=faktura.partner_id)
+                    protokol += ' +5../321'
+                else:
+                    problem = True
+                    protokol += ' <b>nelze přidat 5../321, neznám fp.md 5..</b>'
             # ano: zkontroluj zda 5../321 záznam není problematický 
             elif len(prijata)>1:
                 problem = True
@@ -114,7 +131,7 @@ def zauctovani():
                 protokol += ' plac-OK'
             else:
                 problem = True
-                protokol += ' <b>uhrada %s (%s)?</b>' % (zaplaceno-faktura.castka,
+                protokol += ' <b>chybí %s (%s)?</b>' % (faktura.castka-zaplaceno,
                             faktura.uhrazeno and faktura.uhrazeno.strftime('%d.%m.%Y') or '?')
 
             if not problem:

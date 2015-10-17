@@ -1,0 +1,25 @@
+{{extend 'layout.html'}}
+
+<table>
+{{for ucet in vypis_uctu:}}
+  <tr>
+    <td>{{=ucet}}</td>
+    {{secteny = scitadlo[ucet]}}
+    <td style="text-align: right;">{{=int(round(secteny[0]))}}</td>
+    <td style="text-align: right;">{{=int(round(secteny[1]))}}</td>
+    <td style="text-align: right;">{{=int(round(secteny[2]))}}</td>
+  </tr>
+  {{pass}}
+  </table>
+
+<table>
+{{for ucet in vypis_uctu2:}}
+  <tr>
+    <td>{{=ucet}}</td>
+    {{secteny = scitadlo2[ucet]}}
+    <td style="text-align: right;">{{=int(round(secteny[0]))}}</td>
+    <td style="text-align: right;">{{=int(round(secteny[1]))}}</td>
+    <td style="text-align: right;">{{=int(round(secteny[2]))}}</td>
+  </tr>
+  {{pass}}
+  </table>
