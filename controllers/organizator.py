@@ -17,10 +17,11 @@ def pokladna():
                 orderby=~db.pohyb.datum)
     mam = 0
     for zapis in zapisy:
-        if zapis.pohyb.iddal==Uc_sa.org:   # organizátor vydal
+        if zapis.pohyb.iddal == Uc_sa.org:   # organizátor vydal
             mam -= zapis.pohyb.castka
         else:                        # organizátor získal
             mam += zapis.pohyb.castka
+
     return dict(zapisy=zapisy, mam=mam,
               adm=adm, pokladnik=auth.has_membership('pokladna'),
               arg=request.args(0) or '')
@@ -216,10 +217,10 @@ def _skryj(vic=0, warning=False):
     else:
         db.pohyb.popis.comment = TFu('Zapiš cokoli, co chceš vysvětlit pokladníkovi.')
         if warning:
-            db.pohyb.idauth_user.comment=TFu('musí být uvedeno [[Omluva: Háčky jsou momentálně až na konci.]]')
+            db.pohyb.idauth_user.comment=TFu('musí být uvedeno')
             db.pohyb.cislo_uctu.readable=db.pohyb.cislo_uctu.writable=False
         else:
-            db.pohyb.idauth_user.comment=TFu('přednostně zde; jen v nouzi v následujícím údaji [[Omluva: Háčky jsou momentálně až na konci.]]')
+            db.pohyb.idauth_user.comment=TFu('přednostně zde; jen v nouzi v následujícím údaji')
             db.pohyb.cislo_uctu.label = TFu('Nick nereg. uživatele')
             db.pohyb.cislo_uctu.comment = TFu('zadej, jestliže nemůžeš nalézt/vybrat uživatele v předchozím údaji; můžeš zapsat i něco jako "host" nebo "kamarádka Kajouska"')
         #db.pohyb.vs.label = TFu('Symbol uživatele')

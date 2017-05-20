@@ -42,6 +42,16 @@ def pohyby():
     pohyby = db(db.pohyb.idauth_user==uzivatel_id
                       ).select(orderby=~db.pohyb.datum)
     uzivatel = db.auth_user[uzivatel_id]
+
+    form = None
+    if auth.has_membership('pokladna'):
+        form = SQLFORM.factory(
+            Field('nova_zaloha', 'decimal(11,2)', requires=IS_DECIMAL_IN_RANGE(None, None, dot="."),
+                    label = TFu("Nová záloha")),
+            )
+        if form.process().accepted:
+            uzivatel.update_record(zaloha=form.vars.nova_zaloha)
+
     nick = uzivatel.nick if request.args(0) else '' # promítání cizích adminem
     zaloha = uzivatel.zaloha
             # nelze auth.user.zaloha, když jsem připustil zadání id parametrem
@@ -81,8 +91,9 @@ def pohyby():
             # obrácení znaménka pro zobrazení
             if ukaz_minus:                
                 pohyb.castka = -pohyb.castka
+
     return dict(zaloha=zaloha, pohyby=pohyby, Celkem=Celkem,
-            Uc_sa=Uc_sa, nick=nick, uzivatel_id=uzivatel_id)
+            Uc_sa=Uc_sa, nick=nick, uzivatel_id=uzivatel_id, form=form)
 
 @auth.requires_membership('vedeni')
 def vse():

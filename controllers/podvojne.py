@@ -93,8 +93,8 @@ def ucet():
         ucet = db.ucet[request.args[0]]
         if ucet:
             response.view = 'podvojne/pohyby.html'
-            return _podvojne((db.pohyb.idma_dati==request.args[0])|
-                (db.pohyb.iddal==request.args[0]),
+            return _podvojne(((db.pohyb.idma_dati==request.args[0])|
+                (db.pohyb.iddal==request.args[0]))&(db.pohyb.datum.year()>=2013),
                 hdr = '%s : %s (%s)' % (ucet.ucet, ucet.nazev, ucet.zkratka),
                 lnk = A('přehled účtů', _href=URL('zaverky', 'osnova')),
                 fp = True, historie_uctu=int(request.args[0]))
@@ -110,7 +110,7 @@ def _podvojne(query, fp=False, hdr=None, lnk=None, historie_uctu=None):
           db.pohyb.ALL,
           db.auth_user.nick,
           org.nick,
-          md.zkratka, dal.zkratka,
+          md.ucet, md.zkratka, dal.ucet, dal.zkratka,
           *dalsi_pole,
           left=left,
           orderby=~db.pohyb.datum)

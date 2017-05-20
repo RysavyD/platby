@@ -1,7 +1,20 @@
 # coding: utf8
 
+import locale
 from mz_wkasa_platby import fix_login, Uc_sa
     # Uc_sa - id účtů účtové osnovy - při importu zde je vidí controléry i views
+
+locale.setlocale(locale.LC_ALL, 'cs_CZ.UTF-8')
+
+
+class IS_IN_DB_(IS_IN_DB):
+    def build_set(self):
+        super(IS_IN_DB_, self).build_set()
+        records = [(lbl, self.theset[pos]) for pos, lbl in enumerate(self.labels)]
+        records.sort(key=lambda x: locale.strxfrm(x[0]))
+        self.labels = [rec[0] for rec in records]
+        self.theset = [rec[1] for rec in records]
+
 
 db.define_table('ucet',
     Field('ucet', length=7),
@@ -67,7 +80,7 @@ db.define_table('fp',
 
 db.define_table('pohyb',
     Field('idauth_user', 'reference auth_user', label=TFu("Uživatel"),
-          requires=IS_EMPTY_OR(IS_IN_DB(db, db.auth_user.id, '%(nick)s - %(vs)s'))),
+          requires=IS_EMPTY_OR(IS_IN_DB_(db, db.auth_user.id, '%(nick)s - %(vs)s'))),
     Field('idorganizator', 'reference auth_user', label=TFu("Zadal organizátor"),
           readable=False, writable=False,
           requires=IS_EMPTY_OR(IS_IN_DB(db, db.auth_user.id, '%(nick)s - %(vs)s'))),

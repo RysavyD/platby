@@ -37,7 +37,7 @@ Pokud se spleteš, zavolej nebo napiš pokladníkovi: 732457966 zvolsky@seznam.c
   <div class="obly modry">
   <table>{{for zapis in zapisy:}}
     <tr>
-      {{castka = zapis.pohyb.castka if zapis.pohyb.idma_dati==Uc_sa.org else -zapis.pohyb.castka
+      {{castka = zapis.pohyb.castka if zapis.pohyb.idma_dati in (Uc_sa.org, Uc_sa.pluskredit) else -zapis.pohyb.castka
       schvaleny = zapis.pohyb.ks in ('33','30','3!','3#')
       if adm:
         status=zapis.pohyb.ks

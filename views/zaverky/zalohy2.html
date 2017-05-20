@@ -1,0 +1,57 @@
+{{extend 'layout.html'}}
+
+<table>
+    <tr><td>shoda</td><td><b>{{=shoda}}</b></td></tr>
+    <tr><td>neshoda</td><td><b>{{=neshoda}}</b></td></tr>
+    <tr><td>manko</td><td><b>{{=manko}}</b></td></tr>
+</table>
+
+<div class="obly modry">
+    <h3>Neshodní :</h3>
+    <table>
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>VS</th>
+            <th>nick</th>
+            <th>e-mail</th>
+            <th>z user</th>
+            <th>z pohyb</th>
+            <th>manko</th>
+        </tr>
+    </thead>
+    {{for neshodny in neshodni:}}
+        <tr>
+        {{for col in xrange(7):}}
+            <td><a href="{{=URL('platby', 'pohyby', args=neshodny[1])}}">{{=neshodny[col]}}</a></td>
+        {{pass}}
+        </tr>
+    {{pass}}
+    </table>
+</div>
+
+<h4>Celkem:</h4>
+<table>
+    <tr><td>z uživatelů</td><td><b>{{=s_user}}</b></td></tr>
+    <tr><td>z pohybů</td><td><b>{{=s_pohyb}}</b></td></tr>
+    <tr><td><b>rozdíl</b></td><td><b>{{=s_user - s_pohyb}}</b></td></tr>
+</table>
+
+<div class="obly modry">
+    <h4>Pohyby (s účtem os.záloh) bez uvedení uživatele:</h4>
+    {{if divne:}}
+        <table>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>datum</th>
+                <th>castka</th>
+            </tr>
+        </thead>
+        {{for pos, divny in enumerate(divne):}}
+            <tr><td>{{=divny.id}}</td><td>{{=divny.datum.strftime('%d.%m.%Y')}}</td><td>{{=castky[pos]}}</td><td><small>{{=divny.popis}}</small></td></tr>
+        {{pass}}
+        </table>
+        Celkem za divné: {{=sum(castky)}}
+    {{else:}} .. nejsou {{pass}}
+</div>

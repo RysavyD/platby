@@ -1,6 +1,7 @@
 {{extend 'layout.html'}}
 
 <table>
+{{celkem = 0}}
 {{for dluh in dluhy:}}
     {{castka = int(round(dluhy[dluh][0]))}}
     {{if castka:}}
@@ -10,6 +11,10 @@
             <td>{{=dluhy[dluh][1]}}</td>
             <td><a href="{{=URL('pokladna', args=dluhy[dluh][2])}}">{{=dluhy[dluh][2]}}</a></td>
         </tr>
+        {{celkem += castka}}
     {{pass}}
 {{pass}}
 </table>
+
+<p>Celkem: <b>{{= celkem}}</b></p>
+<p><b>+</b> dluží pokladně, <b>-</b> pokladna má doplatit</p>

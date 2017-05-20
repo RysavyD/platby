@@ -1,5 +1,1 @@
-# m h  dom mon dow   command
-*/20 * * * * /usr/bin/python2.6 ~/web2py/web2py.py -M -S platby -R applications/platby/scripts/update_fio.py
-50 2 * * * /usr/bin/python2.6 ~/web2py/web2py.py -M -S platby -R applications/platby/scripts/sys.py
-5,10,15,25,30,35,45,50,55 5-8 * * * /usr/bin/python2.6 ~/web2py/web2py.py -M -S platby -R applications/platby/scripts/send_plan_maily.py
-
+viz knowhow/

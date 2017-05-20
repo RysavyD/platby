@@ -32,6 +32,8 @@ class Uc_sa(object):
     vraceno = 14  # XXX vrácené zálohy
     zaloha = 21   # 314 zálohy
     fp = 22       # 321 faktury přijaté
+    # revidovat!! ovlivnění výnosů/nákladů??? --vyhledej i všechna použití .pluskredit v kodu!
+    pluskredit = 40  # 221-00 na MD straně, nemění BU, ale navýší Dal=379-09 os.zálohu - toto revidovat!!!
 
     gl_ozwk = (5,7,24) # osobní účet ve správě na wKasa
     gl_sdr = (1,2,9)   # účty sdružení

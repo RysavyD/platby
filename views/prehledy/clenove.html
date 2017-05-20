@@ -9,6 +9,9 @@
 <div class="obly modry"><table>
   <thead>
     <th>Nick</th>
+    {{if auth.has_membership('vedeni'):}}
+      <th>E-mail</th>
+    {{pass}}
     <th>Ode dne</th>
     <th>(do dne)</th>
   </thead>
@@ -21,6 +24,9 @@
   {{pass}}
   <tr>
     <td>{{=clen.auth_user.nick or ''}}</td>
+    {{if auth.has_membership('vedeni'):}}
+      <td>{{=clen.auth_user.email or ''}}</td>
+    {{pass}}
     <td>{{=(clen.clenstvi.ode_dne.strftime('%d.%m.%Y') if clen.clenstvi.ode_dne else '')}}</td>
     <td>{{=(clen.clenstvi.do_dne.strftime('%d.%m.%Y') if clen.clenstvi.do_dne else '')}}</td>
     {{if auth.has_membership("vedeni"):}}

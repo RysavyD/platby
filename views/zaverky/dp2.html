@@ -1,4 +1,9 @@
 {{extend 'layout.html'}}
+{{from collections import defaultdict}}
+{{hlavni = defaultdict(lambda: 0)}}
+
+</div>
+<div class="span3">
 
 <table>
 {{for ucet in vypis_uctu:}}
@@ -7,10 +12,13 @@
     {{secteny = scitadlo[ucet]}}
     <td style="text-align: right;">{{=int(round(secteny[0]))}}</td>
     <td style="text-align: right;">{{=int(round(secteny[1]))}}</td>
-    <td style="text-align: right;">{{=int(round(secteny[2]))}}</td>
+    {{Nxx = ucet[0]}}
+    {{secteny2 = int(round(secteny[2]))}}
+    {{hlavni[Nxx] += secteny2}}
+    <td style="text-align: right;">{{=secteny2}}</td>
   </tr>
-  {{pass}}
-  </table>
+{{pass}}
+</table>
 
 <table>
 {{for ucet in vypis_uctu2:}}
@@ -21,5 +29,21 @@
     <td style="text-align: right;">{{=int(round(secteny[1]))}}</td>
     <td style="text-align: right;">{{=int(round(secteny[2]))}}</td>
   </tr>
-  {{pass}}
-  </table>
+{{pass}}
+</table>
+
+</div>
+<div class="span9">
+
+<table>
+{{hlavni = sorted([(skupina + '..', hlavni[skupina]) for skupina in hlavni])}}
+{{for pos, skupina in enumerate(hlavni):}}
+  <tr>
+    <td>{{=hlavni[pos][0]}}</td>
+    <td style="text-align: right;">{{=hlavni[pos][1]}}</td>
+  </tr>
+{{pass}}
+</table>
+
+</div>
+<div class="span12">

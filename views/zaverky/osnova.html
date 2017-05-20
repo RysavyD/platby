@@ -2,6 +2,10 @@
 
 <h2>Používané podvojné účty</h2>
 
+{{if auth.requires_membership('pokladna'):}}
+<a href="{{=URL('editovat_osnovu')}}">Editovat osnovu</a>
+{{pass}}
+
 <table>
 {{for ucet in ucty:}}
   <tr>

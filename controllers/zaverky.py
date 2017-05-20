@@ -202,7 +202,8 @@ def dp():
                 akt_mesic = dne.month
         return akt_rok, akt_mesic
 
-    preklenovaci_ucet = db(db.ucet.ucet=='96').select().first().id
+    preklenovaci_ucet = db(db.ucet.ucet=='702').select().first().id
+    #preklenovaci_ucet_2 = db(db.ucet.ucet=='701').select().first().id   # 3.2017 zatím všude nechávám 702
     permice_ucet = db(db.ucet.ucet=='213').select().first().id
     vynosy_akci_ucet = db(db.ucet.ucet=='602').select().first().id
     fungujeme_ucet = db(db.ucet.ucet=='379-12').select().first().id
@@ -247,7 +248,7 @@ def dp():
         if datetime.date(permice.datum.year, permice.datum.month, permice.datum.day)<=k_datu_default:
             out_do_rozhodneho += permice.castka
     if auth.has_membership('pokladna'):
-        inputy = [Field('zavrit', 'boolean', default=False, label='uzavřít', comment="zapsat převáděcí účet 96 do databáze?"),
+        inputy = [Field('zavrit', 'boolean', default=False, label='uzavřít', comment="zapsat převáděcí účet 702/701 do databáze?"),
                 Field('zapsat', 'boolean', default=False, label='zapsat', comment="fyzicky zapsat změny 213 a 602 do databáze?")]
     else:
         inputy = []
@@ -289,7 +290,7 @@ def dp():
                 zustatek_jedne = form.vars.get('permice%s' % idx)
                 if zustatek_jedne is None:
                     break
-                zustatek_permic += int(zustatek_jedne)
+                zustatek_permic += int(zustatek_jedne or 0)
             if zustatek_permic>permice_max:
                 problem = 'NELZE - permanentky: %s > %s' % (zustatek_permic, int(round(permice_max)))
             elif prednastaveno>zustatek_permic:
@@ -313,11 +314,11 @@ def dp():
                     scitadlo['602'] = [scitadlo['602'][0], scitadlo['602'][1]+castka, scitadlo['602'][2]-castka]
                     scitadlo2['379-12'] = [scitadlo2['379-12'][0]+castka, scitadlo2['379-12'][1], scitadlo2['379-12'][2]+castka]
                     scitadlo2['602'] = [scitadlo2['602'][0], scitadlo2['602'][1]+castka, scitadlo2['602'][2]-castka]
-            if form.vars.zapsat:
-                db.commit()
             pred_pulnoc = datetime.datetime(form.vars.k_datu.year, form.vars.k_datu.month, form.vars.k_datu.day, 23, 59)
             pohyby = db((db.pohyb.datum>=iniciovano_ke_dni) & (db.pohyb.datum<=pred_pulnoc)).select(orderby=db.pohyb.datum)
             for pohyb in pohyby:
+                if pohyb.idma_dati is None or pohyb.iddal is None:
+                    return "Nektera transakce nema uveden ucet MD/Dal. Nejprve dopln."
                 ucno2 = ucty2[pohyb.idma_dati]
                 ucno = ucno2[:3]
                 scitadlo[ucno] = scitadlo[ucno][0]+pohyb.castka, scitadlo[ucno][1], scitadlo[ucno][2]+pohyb.castka
@@ -329,19 +330,30 @@ def dp():
             vypis_uctu = sorted(list(scitadlo))
             vypis_uctu2 = sorted(list(scitadlo2))
             
+            if form.vars.zapsat:
+                db.commit()
             if form.vars.zavrit:
-                dalsi_den = form.vars.k_datu + datetime.timedelta(days=1)
+                dalsi_den = form.vars.k_datu + datetime.timedelta(days=1)  # 3.2017: zatím nepřecházím na 702/701, nechávám 702/702
                 for ucet in vypis_uctu2:
+                    if ucet[0]>'6':      # divné / nezajímavé ?
+                        continue
+                    secteny = scitadlo2[ucet]
+                    prevod = int(round(secteny[2]))
                     if ucet[0]<'5':      # ne náklady a výnosy
-                        secteny = scitadlo2[ucet]
-                        prevod = int(round(secteny[2]))
-                        if prevod>0:
-                            db.pohyb.insert(idma_dati=ucty['96'], iddal=ucty[ucet], datum=form.vars.k_datu, castka=prevod)
-                            db.pohyb.insert(idma_dati=ucty[ucet], iddal=ucty['96'], datum=dalsi_den, castka=prevod)
-                        elif prevod<0:
-                            db.pohyb.insert(idma_dati=ucty[ucet], iddal=ucty['96'], datum=form.vars.k_datu, castka= - prevod)
-                            db.pohyb.insert(idma_dati=ucty['96'], iddal=ucty[ucet], datum=dalsi_den, castka= - prevod)
-            
+                        sber = '702'
+                        next_year = True
+                    else:
+                        sber = '710'     # 5,6: náklady a výnosy
+                        next_year = False
+                    if prevod>0:
+                        db.pohyb.insert(idma_dati=ucty[sber], iddal=ucty[ucet], datum=form.vars.k_datu, castka=prevod)
+                        if next_year:
+                            db.pohyb.insert(idma_dati=ucty[ucet], iddal=ucty[sber], datum=dalsi_den, castka=prevod)
+                    elif prevod<0:
+                        db.pohyb.insert(idma_dati=ucty[ucet], iddal=ucty[sber], datum=form.vars.k_datu, castka= - prevod)
+                        if next_year:
+                            db.pohyb.insert(idma_dati=ucty[sber], iddal=ucty[ucet], datum=dalsi_den, castka= - prevod)
+
             response.view = 'zaverky/dp2.html'
             return dict(vypis_uctu=vypis_uctu, scitadlo=scitadlo, vypis_uctu2=vypis_uctu2, scitadlo2=scitadlo2)
 
@@ -351,3 +363,80 @@ def dp():
             permice_max=permice_max, out_celkem = out_celkem,
             form=form, problem=problem,
             iniciovano_ke_dni=iniciovano_ke_dni)
+
+
+@auth.requires_membership('pokladna')
+def editovat_osnovu():
+    grid = SQLFORM.grid(db.ucet,
+                        showbuttontext=False,
+                        )
+    search_input = grid.element('#w2p_keywords')
+    search_input and search_input.attributes.pop('_onfocus')
+    return dict(grid=grid)
+
+
+@auth.requires_membership('vedeni')
+def zalohy():
+    sum_auth_user = db.auth_user.zaloha.sum()
+    zalohy = db().select(sum_auth_user).first()[sum_auth_user]
+
+    ucet_zaloh = db(db.ucet.ucet == '379-09').select().first().id
+    sum_pohyby = db.pohyb.castka.sum()
+    dal = db(db.pohyb.iddal == ucet_zaloh).select(sum_pohyby).first()[sum_pohyby]
+    md = db(db.pohyb.idma_dati == ucet_zaloh).select(sum_pohyby).first()[sum_pohyby]
+
+    preklenovaci_ucet = db(db.ucet.ucet == '702').select().first().id
+    prevody0 = db((db.pohyb.iddal == ucet_zaloh) & (db.pohyb.idma_dati == preklenovaci_ucet)).select(sum_pohyby).first()[sum_pohyby]
+    prevody1 = db((db.pohyb.idma_dati == ucet_zaloh) & (db.pohyb.iddal == preklenovaci_ucet)).select(sum_pohyby).first()[sum_pohyby]
+
+    return dict(zalohy=zalohy, dal=dal, md=md, prevody=(prevody0, prevody1))
+
+
+@auth.requires_membership('pokladna')
+def zalohy2():
+    """
+        po jednotlivých uživatelích
+    """
+    from collections import defaultdict
+
+    pohyby = defaultdict(lambda: [0, 0])   # dal, md
+    preklenovaci_ucet = db(db.ucet.ucet == '702').select().first().id
+
+    ucet_zaloh = db(db.ucet.ucet == '379-09').select().first().id
+
+    md = db(db.pohyb.idma_dati == ucet_zaloh).select(db.pohyb.castka, db.pohyb.idauth_user)
+    dal = db(db.pohyb.iddal == ucet_zaloh).select(db.pohyb.castka, db.pohyb.idauth_user)
+    for pohyb in dal:
+        pohyby[pohyb.idauth_user][0] += pohyb.castka
+    for pohyb in md:
+        pohyby[pohyb.idauth_user][1] += pohyb.castka
+
+    shoda = neshoda = manko = s_user = s_pohyb = 0
+    neshodni = []
+    uzivatele = db().select(db.auth_user.id, db.auth_user.vs, db.auth_user.nick, db.auth_user.email, db.auth_user.zaloha,
+                                 orderby=db.auth_user.id)
+    for uzivatel in uzivatele:
+        z_pohybu = pohyby[uzivatel.id][0] - pohyby[uzivatel.id][1]
+        s_user += uzivatel.zaloha
+        s_pohyb += z_pohybu
+        if uzivatel.zaloha == z_pohybu:
+            shoda += 1
+        else:
+            neshoda += 1
+            manko1 = uzivatel.zaloha - z_pohybu
+            manko += manko1
+            neshodni.append((uzivatel.id, uzivatel.vs, uzivatel.nick, uzivatel.email, uzivatel.zaloha, z_pohybu, manko1))
+
+    divne = db(((db.pohyb.idauth_user == None) | (db.pohyb.idauth_user <= 0)) &
+               ((db.pohyb.idma_dati == ucet_zaloh) | (db.pohyb.iddal == ucet_zaloh)) &
+               (db.pohyb.idma_dati != preklenovaci_ucet) & (db.pohyb.iddal != preklenovaci_ucet)).select(
+            db.pohyb.id, db.pohyb.datum, db.pohyb.castka, db.pohyb.iddal, db.pohyb.popis, orderby=~db.pohyb.datum)
+    castky = []
+    for divny in divne:
+        if divny.iddal == ucet_zaloh:  # nelze update_record(), protože se commitne
+            castky.append(-divny.castka)
+        else:
+            castky.append(divny.castka)
+
+    neshodni.sort(key=lambda r: r[-1], reverse=True)
+    return dict(shoda=shoda, neshoda=neshoda, manko=manko, neshodni=neshodni, s_user=s_user, s_pohyb=s_pohyb, divne=divne, castky=castky)

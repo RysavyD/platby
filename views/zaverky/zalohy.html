@@ -1,0 +1,20 @@
+{{extend 'layout.html'}}
+
+<div class="obly modry">
+    <p>Zálohy součtem v seznamu uživatelů: <b>{{=zalohy}}</b></p>
+</div>
+
+<div class="obly modry">
+    <h4>Zálohy z pohybů (Dal - MD)</h4>
+    <p>{{=dal}} - {{=md}} = <b>{{=dal - md}}</b></p>
+</div>
+
+<div class="obly modry">
+    <h4>Korekce odečtením závěrkových převodů</h4>
+    <p>Závěrkové převody: {{=prevody[0]}} - {{=prevody[1]}} = {{=prevody[0] - prevody[1]}}</p>
+    <p>Závěrkové převody: {{=dal - prevody[0]}} - {{=md - prevody[1]}} = <b>{{=dal - md - prevody[0] + prevody[1]}}</b></p>
+</div>
+
+{{if auth.has_membership('pokladna'):}}
+    <a href="{{=URL('zalohy2')}}">zkontrolovat jednotlivé uživatele</a>
+{{pass}}

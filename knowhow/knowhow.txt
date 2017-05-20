@@ -1,0 +1,5 @@
+cron se definuje standardně: crontab -e
+  >/dev/null 2>&1 přesměruje errors(2) do output(1), což potlačí, takže nejsou zasílány maily
+
+kromě min/ -> web2py/
+  přidat ještě scripts/sessions2trash.py

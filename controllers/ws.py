@@ -69,15 +69,14 @@ def novy():
             nickL = nick.lower()
             mailL = mail.lower()
             uzivatel = db(db.auth_user.email.lower()==mailL).select().first()
-            if uzivatel:    
+            if uzivatel:
                 retval = dict(vs=uzivatel.vs, problem='email existuje')
                 __log_res('mail_dupl')
                 return retval
             uzivatel = db(db.auth_user.nick.lower()==nickL).select().first()
-            if uzivatel:    
-                retval = dict(vs=uzivatel.vs, problem='nick existuje')
-                __log_res('nick_dupl')
-                return retval
+            if uzivatel:
+                __log_res('nick_dupl-rename (sa_%s)' % uzivatel.nick)
+                uzivatel.update_record(nick='sa_' + uzivatel.nick)
             new_vs = get_new_vs(db, vs_default)  # vs_default je definován v db.py
             new_id = db.auth_user.insert(nick=nick, email=mail, vs=new_vs)
             retval = dict(vs=new_vs, problem='')
@@ -100,9 +99,9 @@ def udaje():
         regist_token = first_token
         if token==md5(regist_token+dotaz).hexdigest():
             if '@' in dotaz:
-                uzivatel = db(db.auth_user.email==dotaz).select().first()
+                uzivatel = db(db.auth_user.email.lower() == dotaz.lower()).select().first()
             else:
-                uzivatel = db(db.auth_user.vs==dotaz).select().first()
+                uzivatel = db(db.auth_user.vs == dotaz).select().first()
             if uzivatel:
                 retval = dict(vs=uzivatel.vs or '',
                               email=uzivatel.email or '',
@@ -236,7 +235,7 @@ def __valid_params(args, db):
                     popis += '/' + args[za_lomitkem]
                 uzivatel = db(db.auth_user.vs==vs).select().first()
                 if (castka and popis and uzivatel
-                                    and uzivatel.email==args[3]):
+                                    and uzivatel.email.lower()==args[3].lower()):
                     akce = args[4] or ''
                     is_valid = True
     return is_valid, castka, popis, uzivatel, akce
